@@ -1,6 +1,10 @@
 woocommerce==3.0.0
 requests==2.31.0
-pandas==2.1.1
+# Совместимая связка pandas 2.3.0 <-> numpy 2.3.1
+pandas==2.3.0
+numpy==2.3.1
 pillow==10.0.1
+pillow-avif-plugin==1.4.6
+paramiko==3.5.1
 tkinter-tooltip==2.0.0
 ttkbootstrap==1.10.1

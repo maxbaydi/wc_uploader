@@ -1,0 +1,629 @@
+[16:13:55] === WooCommerce FIFU Uploader ===
+[16:13:55] Выберите CSV файл и папку с изображениями для начала работы
+[16:13:56] 🔧 Автоматическая загрузка настроек при запуске...
+[16:13:56] ✅ Настройки загружены: SFTP, WooCommerce, AI
+[16:14:27] ✓ Выбран CSV файл для AI генерации: test_ai_descriptions.csv
+[16:14:27] 📋 Найденные колонки: product_name, price, category, description
+[16:14:27] 🎯 Автоматически выбрана колонка названий: product_name
+[16:14:58] 🤖 Запуск генерации AI описаний...
+[16:14:58] ==================================================
+[16:14:58] 🤖 НАЧАЛО ГЕНЕРАЦИИ AI ОПИСАНИЙ
+[16:14:58] ==================================================
+[16:14:58] 📋 Читаю CSV файл: test_ai_descriptions.csv
+[16:14:58] 📊 Найдено 5 товаров для генерации описаний
+[16:14:58] 🔧 Настройки: язык=english, макс.длина=300, размер пакета=5
+[16:14:58] 📝 Создана новая колонка 'description'
+[16:14:58] 
+🔄 Обработка пакета 1/1 (5 товаров)
+[16:14:58] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:15:29] ✓ ID 1: 'Маркировка для проводов UCT-WMCO 6,8 (23X8)' -> 'Wire Marking Labels UCT-WMCO 6.8 (23x8)' -> описание 244 символов
+[16:15:29] ✓ ID 2: 'Маркировка для проводов UCT-WMCO 4,7 (23X4)' -> 'Wire Marking Labels UCT-WMCO 4.7 (23x4)' -> описание 251 символов
+[16:15:29] ✓ ID 3: 'Маркировка для проводов UCT-WMCO 7,5 (23X8)' -> 'Wire Marking Labels UCT-WMCO 7.5 (23x8)' -> описание 231 символов
+[16:15:29] ✓ ID 4: 'Усадочная трубка термоусадочная 6мм' -> 'Heat Shrink Tubing 6mm' -> описание 204 символов
+[16:15:29] ✓ ID 5: 'Кабель витая пара UTP Cat.5e 4пары 305м' -> 'UTP Cat5e Ethernet Cable, 4-Pair, 305m' -> описание 177 символов
+[16:15:29] ✅ Успешно сгенерировано 5 описаний
+[16:15:29] 🔄 Название обновлено: 'Маркировка для проводов UCT-WMCO 6,8 (23X8)' -> 'Wire Marking Labels UCT-WMCO 6.8 (23x8)'
+[16:15:29] 🔄 Название обновлено: 'Маркировка для проводов UCT-WMCO 4,7 (23X4)' -> 'Wire Marking Labels UCT-WMCO 4.7 (23x4)'
+[16:15:29] 🔄 Название обновлено: 'Маркировка для проводов UCT-WMCO 7,5 (23X8)' -> 'Wire Marking Labels UCT-WMCO 7.5 (23x8)'
+[16:15:29] 🔄 Название обновлено: 'Усадочная трубка термоусадочная 6мм' -> 'Heat Shrink Tubing 6mm'
+[16:15:29] 🔄 Название обновлено: 'Кабель витая пара UTP Cat.5e 4пары 305м' -> 'UTP Cat5e Ethernet Cable, 4-Pair, 305m'
+[16:15:29] 💾 Обновленный CSV сохранен: test_ai_descriptions.csv
+[16:15:29] 
+==================================================
+[16:15:29] 📊 РЕЗУЛЬТАТЫ ГЕНЕРАЦИИ ОПИСАНИЙ
+[16:15:29] ==================================================
+[16:15:29] Всего товаров: 5
+[16:15:29] Сгенерировано описаний: 5
+[16:15:29] Пропущено: 0
+[16:15:29] Ошибки: 0
+[16:15:29] Обработано пакетов: 1
+[16:15:29] Успешность: 100.0%
+[16:21:11] ✓ Выбран CSV файл для AI генерации: mistubishi_prod_reduced_50_percent.csv
+[16:21:11] 📋 Найденные колонки: article, brand, image, price, name
+[16:21:11] 🎯 Автоматически выбрана колонка названий: name
+[16:21:25] 🤖 Запуск генерации AI описаний...
+[16:21:25] ==================================================
+[16:21:25] 🤖 НАЧАЛО ГЕНЕРАЦИИ AI ОПИСАНИЙ
+[16:21:25] ==================================================
+[16:21:25] 📋 Читаю CSV файл: mistubishi_prod_reduced_50_percent.csv
+[16:21:25] 📊 Найдено 200 товаров для генерации описаний
+[16:21:25] 🔧 Настройки: язык=english, макс.длина=300, размер пакета=5
+[16:21:25] 📝 Создана новая колонка 'description'
+[16:21:25] 
+🔄 Обработка пакета 1/40 (5 товаров)
+[16:21:25] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:22:25] ❌ Таймаут запроса к AI API
+[16:22:25] ❌ Ошибка генерации для пакета 1
+[16:22:25] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:22:26] 
+🔄 Обработка пакета 2/40 (5 товаров)
+[16:22:26] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:22:49] ✓ ID 1: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 36-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 36-Input, Sink, Source Input' -> описание 207 символов
+[16:22:49] ✓ ID 2: 'Mitsubishi Electric Inverter Drive, 0.75 kW, 1 Phase, 200 → 240 V ac, 4.2 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 0.75 kW, 1 Phase, 200 → 240 V ac, 4.2 A, FR-CS80 Series' -> описание 197 символов
+[16:22:49] ✓ ID 3: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 14-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 14-Input, Sink, Source Input' -> описание 174 символов
+[16:22:49] ✓ ID 4: 'Mitsubishi Electric Inverter Module, 1.5 kW, 3 Phase, 480 V, 4 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 1.5 kW, 3 Phase, 480 V, 4 A, FR-E800 Series' -> описание 159 символов
+[16:22:49] ✓ ID 5: 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 380 → 480 V ac, 3.6 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 380 → 480 V ac, 3.6 A, FR-CS80 Series' -> описание 165 символов
+[16:22:49] ✅ Успешно сгенерировано 5 описаний
+[16:22:49] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:22:50] 
+🔄 Обработка пакета 3/40 (5 товаров)
+[16:22:50] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:23:51] ❌ Таймаут запроса к AI API
+[16:23:51] ❌ Ошибка генерации для пакета 3
+[16:23:51] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:23:52] 
+🔄 Обработка пакета 4/40 (5 товаров)
+[16:23:52] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:24:16] ✓ ID 1: 'Mitsubishi Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5 A, FR-D740 Series' -> 'Mitsubishi Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5 A, FR-D740 Series' -> описание 200 символов
+[16:24:16] ✓ ID 2: 'Mitsubishi Electric Inverter Module, 15 kW, 3 Phase, 480 V, 41 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 15 kW, 3 Phase, 480 V, 41 A, FR-E800 Series' -> описание 171 символов
+[16:24:16] ✓ ID 3: 'Mitsubishi Electric PLC Cable for Use with QC Series' -> 'Mitsubishi Electric PLC Cable for Use with QC Series' -> описание 150 символов
+[16:24:16] ✓ ID 4: 'Mitsubishi PLC Expansion Module for Use with FX2N Series, Analogue, Digital' -> 'Mitsubishi PLC Expansion Module for Use with FX2N Series, Analog & Digital' -> описание 138 символов
+[16:24:16] ✓ ID 5: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 12 (Sink/Source)-Input, Sink, Source' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 12 I/O (Sink/Source)' -> описание 152 символов
+[16:24:16] ✅ Успешно сгенерировано 5 описаний
+[16:24:16] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:24:17] 
+🔄 Обработка пакета 5/40 (5 товаров)
+[16:24:17] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:24:43] ✓ ID 1: 'Mitsubishi Electric Q Controller Series Base Unit for Use with MELSEC Q Series' -> 'Mitsubishi Electric Q Controller Series Base Unit for Use with MELSEC Q Series' -> описание 240 символов
+[16:24:43] ✓ ID 2: 'Mitsubishi Electric FX5 Series Analogue Module for Use with iQ FX5 PLC, iQ FX5U PLC, DC' -> 'Mitsubishi Electric FX5 Series Analog Module for Use with iQ FX5 and FX5U PLCs (DC)' -> описание 252 символов
+[16:24:43] ✓ ID 3: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital' -> 'Mitsubishi MELSEC Q Series PLC Digital I/O Module' -> описание 231 символов
+[16:24:43] ✓ ID 4: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and Analogue Modules' -> описание 231 символов
+[16:24:43] ✓ ID 5: 'Mitsubishi PLC connection cable 1m For Use With HMI CPU (MELSEC FX series), GOT1000 Series' -> 'Mitsubishi PLC Connection Cable 1m for HMI CPU (MELSEC FX Series), GOT1000 Series' -> описание 185 символов
+[16:24:43] ✅ Успешно сгенерировано 5 описаний
+[16:24:43] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:24:44] 
+🔄 Обработка пакета 6/40 (5 товаров)
+[16:24:44] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:25:08] ✓ ID 1: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 64-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 64-Input (Sink/Source), 100-240V AC, Relay Output' -> описание 202 символов
+[16:25:08] ✓ ID 2: 'Mitsubishi Electric Alpha 2 Series Logic Module, 100 → 240 V ac Supply, Relay Output, 6-Input, Digital Input' -> 'Mitsubishi Electric Alpha 2 Series Logic Module - 6-Input Digital, 100-240V AC, Relay Output' -> описание 203 символов
+[16:25:08] ✓ ID 3: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 16-Input (Sink/Source), 100-240V AC, Relay Output' -> описание 175 символов
+[16:25:08] ✓ ID 4: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 24-Input (Sink/Source), 100-240V AC, Relay Output' -> описание 189 символов
+[16:25:08] ✓ ID 5: 'Mitsubishi Electric Inverter Module, 2.2 kW, 3 Phase, 480 V, 6 A, FR-E800 Series' -> 'Mitsubishi Electric FR-E800 Inverter Module - 2.2 kW, 3-Phase, 480V, 6A' -> описание 183 символов
+[16:25:08] ✅ Успешно сгенерировано 5 описаний
+[16:25:08] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:25:09] 
+🔄 Обработка пакета 7/40 (5 товаров)
+[16:25:09] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:25:28] ✓ ID 1: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 16-Input, DC Input' -> 'Mitsubishi FX3S PLC CPU for FX3 Series' -> описание 213 символов
+[16:25:28] ✓ ID 2: 'Mitsubishi Electric Inverter Drive, 7.5 kW, 3 Phase, 380 → 480 V ac, 16 A, FR-CS80 Series' -> 'Mitsubishi FR-CS80 Inverter Drive – 7.5 kW, 3-Phase, 380–480V' -> описание 225 символов
+[16:25:28] ✓ ID 3: 'Mitsubishi Electric Q61 Series PLC Power Supply for Use with PSU Series, Q Series' -> 'Mitsubishi Q61 Series PLC Power Supply for Q Series' -> описание 182 символов
+[16:25:28] ✓ ID 4: 'Mitsubishi Electric Inverter Module, 0.4 kW, 3 Phase, 480 V, 1.6 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series Inverter Module – 0.4 kW, 3-Phase, 480V' -> описание 169 символов
+[16:25:28] ✓ ID 5: 'Mitsubishi Electric GT25 Series GOT2000 Touch Screen HMI - 10.1 in, LCD Display, 1280 x 800' -> 'Mitsubishi GT25 Series GOT2000 10.1-inch HMI' -> описание 187 символов
+[16:25:28] ✅ Успешно сгенерировано 5 описаний
+[16:25:28] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:25:29] 
+🔄 Обработка пакета 8/40 (5 товаров)
+[16:25:29] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:25:52] ✓ ID 1: 'Mitsubishi Electric Inverter Drive, 7.5 kW, 3 Phase, 400 V ac, 17 A, FR-F800 Series' -> 'Mitsubishi Electric FR-F800 7.5 kW Inverter Drive (3-Phase, 400V, 17A)' -> описание 192 символов
+[16:25:52] ✓ ID 2: 'Mitsubishi Inverter Drive, 0.4 kW, 1 Phase, 230 V ac, 2.5 A, FR-D720S Series' -> 'Mitsubishi FR-D720S Series 0.4 kW Inverter Drive (1-Phase, 230V)' -> описание 168 символов
+[16:25:52] ✓ ID 3: 'Mitsubishi FX3U Series PLC Power Supply for Use with MELSEC Series' -> 'Mitsubishi FX3U Series PLC Power Supply for MELSEC' -> описание 144 символов
+[16:25:52] ✓ ID 4: 'Mitsubishi Electric Inverter Module, 0.75 kW, 1 Phase, 240 V, 5 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series 0.75 kW Inverter Module (1-Phase, 240V)' -> описание 189 символов
+[16:25:52] ✓ ID 5: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Transistor' -> 'Mitsubishi MELSEC Q Series Digital I/O Module (Transistor Output)' -> описание 148 символов
+[16:25:52] ✅ Успешно сгенерировано 5 описаний
+[16:25:52] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:25:53] 
+🔄 Обработка пакета 9/40 (5 товаров)
+[16:25:53] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:26:23] ❌ Ошибка парсинга JSON из ответа AI: Unterminated string starting at: line 16 column 22 (char 898)
+[16:26:23] Содержимое ответа: {
+  "descriptions": [
+    {
+      "id": 1,
+      "name": "Mitsubishi FR-F800 18.5 kW Inverter Drive for 3-phase motors",
+      "description": "Mitsubishi FR-F800 18.5 kW Inverter Drive for 3-phase motors. Enjoy smooth speed control, energy efficiency, and robust protection. Ideal for pumps, fans, and conveyors in 400V systems. Compact, easy setup, and reliable performance."
+    },
+    {
+      "id": 2,
+      "name": "Mitsubishi Electric 15-Inch Touch Screen HMI (1024x768 TFT)",
+      "description...
+[16:26:23] ❌ Ошибка генерации для пакета 9
+[16:26:23] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:26:24] 
+🔄 Обработка пакета 10/40 (5 товаров)
+[16:26:24] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:26:43] ✓ ID 1: 'Mitsubishi Electric MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Analogue' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module – Digital & Analog I/O' -> описание 219 символов
+[16:26:43] ✓ ID 2: 'Mitsubishi Electric Q Controller Series Base Unit for Use with MELSEC Q Series' -> 'Mitsubishi Electric Q Controller Series Base Unit for MELSEC Q Series' -> описание 174 символов
+[16:26:43] ✓ ID 3: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Relay' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module – Digital & Relay I/O' -> описание 188 символов
+[16:26:43] ✓ ID 4: 'Mitsubishi Electric PLC Programming Software for Use with GOT Series HMI's' -> 'Mitsubishi Electric PLC Programming Software for GOT Series HMI' -> описание 178 символов
+[16:26:43] ✓ ID 5: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 3 Phase, 400 V ac, 1.2 A, FR-D740 Series' -> 'Mitsubishi Electric FR-D740 Series Inverter Drive – 0.4 kW, 3-Phase, 400V' -> описание 212 символов
+[16:26:43] ✅ Успешно сгенерировано 5 описаний
+[16:26:43] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:26:44] 
+🔄 Обработка пакета 11/40 (5 товаров)
+[16:26:44] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:27:07] ✓ ID 1: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 32-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module, 100-240 VAC Supply, Relay Output, 32-Input, Sink/Source Input' -> описание 235 символов
+[16:27:07] ✓ ID 2: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Transistor' -> 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Transistor Outputs' -> описание 214 символов
+[16:27:07] ✓ ID 3: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 6-Input, DC Input' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay/Transistor Output, 6-Input, DC Input' -> описание 218 символов
+[16:27:07] ✓ ID 4: 'Mitsubishi GT21 Series GOT2000 Touch Screen HMI - 3.8 in, LCD Display' -> 'Mitsubishi GT21 Series GOT2000 Touch Screen HMI - 3.8 in, LCD Display' -> описание 222 символов
+[16:27:07] ✓ ID 5: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Transistor Output, 40-Input, Sink/Source Input' -> описание 212 символов
+[16:27:07] ✅ Успешно сгенерировано 5 описаний
+[16:27:07] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:27:08] 
+🔄 Обработка пакета 12/40 (5 товаров)
+[16:27:08] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:27:43] ✓ ID 1: 'Mitsubishi Electric CM100RX-24T #300G 3 Phase Bridge IGBT Module, 100 1200 V Module, PCB Mount' -> 'Mitsubishi Electric CM100RX-24T #300G 3 Phase Bridge IGBT Module, 100 A 1200 V Module, PCB Mount' -> описание 215 символов
+[16:27:43] ✓ ID 2: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 16-Input, Sink, Source Input' -> описание 219 символов
+[16:27:43] ✓ ID 3: 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,' -> 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,' -> описание 192 символов
+[16:27:43] ✓ ID 4: 'Mitsubishi Electric FR-PA07 Parameter Unit' -> 'Mitsubishi Electric FR-PA07 Parameter Unit' -> описание 193 символов
+[16:27:43] ✓ ID 5: 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> описание 197 символов
+[16:27:43] ✅ Успешно сгенерировано 5 описаний
+[16:27:43] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:27:44] 
+🔄 Обработка пакета 13/40 (5 товаров)
+[16:27:44] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:28:44] ❌ Таймаут запроса к AI API
+[16:28:44] ❌ Ошибка генерации для пакета 13
+[16:28:44] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:28:45] 
+🔄 Обработка пакета 14/40 (5 товаров)
+[16:28:45] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:29:16] ✓ ID 1: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8.3 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8.3 A, FR-F800 Series' -> описание 192 символов
+[16:29:16] ✓ ID 2: 'Mitsubishi Electric Inverter Module, 3.7 kW, 3 Phase, 480 V, 9.5 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 3.7 kW, 3 Phase, 480 V, 9.5 A, FR-E800 Series' -> описание 194 символов
+[16:29:16] ✓ ID 3: 'Mitsubishi Electric Programming Software GT Designer For Use With HMI GOT' -> 'Mitsubishi Electric Programming Software GT Designer For Use With HMI GOT' -> описание 183 символов
+[16:29:16] ✓ ID 4: 'Mitsubishi Electric MELSEC Q Series Extension Base for Use with MELSEC Q Series' -> 'Mitsubishi Electric MELSEC Q Series Extension Base for Use with MELSEC Q Series' -> описание 151 символов
+[16:29:16] ✓ ID 5: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source' -> описание 149 символов
+[16:29:16] ✅ Успешно сгенерировано 5 описаний
+[16:29:16] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:29:18] 
+🔄 Обработка пакета 15/40 (5 товаров)
+[16:29:18] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:29:48] ✓ ID 1: 'Mitsubishi Cable 3m For Use With HMI GT1040-QBBD, GT1045-QSBD, GT1050-QBBD, GT1055-QSBD, PLC FX1-3 Series' -> 'Mitsubishi 3m Cable for HMI GT1040-QBBD, GT1045-QSBD, GT1050-QBBD, GT1055-QSBD and FX1-3 Series PLC' -> описание 199 символов
+[16:29:48] ✓ ID 2: 'Mitsubishi Electric CM100DY-13T#300G Dual IGBT Module, 100 A 600 V 94x34mm' -> 'Mitsubishi Electric CM100DY-13T#300G Dual IGBT Module, 100 A 600 V, 94x34 mm' -> описание 179 символов
+[16:29:48] ✓ ID 3: 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi FX3U Series PLC Expansion Module - Digital, Relay, Transistor I/O' -> описание 188 символов
+[16:29:48] ✓ ID 4: 'Mitsubishi Q Series Series PLC CPU for Use with MELSEC Q Series, 1024-Input' -> 'Mitsubishi Q Series PLC CPU for MELSEC Q Series, up to 1024 inputs' -> описание 208 символов
+[16:29:48] ✓ ID 5: 'Mitsubishi Electric Touch Screen HMI - 10.4 in, TFT Display, 640 x 480' -> 'Mitsubishi Electric 10.4 in Touch Screen HMI, TFT Display, 640x480' -> описание 180 символов
+[16:29:48] ✅ Успешно сгенерировано 5 описаний
+[16:29:48] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:29:49] 
+🔄 Обработка пакета 16/40 (5 товаров)
+[16:29:49] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:30:23] ✓ ID 1: 'Mitsubishi PLC Programming Software for Use with MELSEC iQ-F Series Programmable Controllers, MELSEC iQ-R Series' -> 'Mitsubishi PLC Programming Software for MELSEC iQ-F Series and iQ-R Series' -> описание 185 символов
+[16:30:23] ✓ ID 2: 'Mitsubishi Inverter Drive, 0.1 kW, 1 Phase, 230 V ac, 800 mA, FR-D720S Series' -> 'Mitsubishi FR-D720S Inverter Drive, 0.1 kW, 1-Phase, 230V' -> описание 178 символов
+[16:30:23] ✓ ID 3: 'Mitsubishi Electric PLC I/O Module for Use with MELSEC iQ-F Series PLC, DC, Transistor, 24 V dc' -> 'Mitsubishi Electric I/O Module for MELSEC iQ-F PLCs, DC, Transistor Outputs, 24 V DC' -> описание 162 символов
+[16:30:23] ✓ ID 4: 'Mitsubishi Electric FX5 Series Analogue Module for Use with iQ FX5 PLC, iQ FX5U PLC, DC' -> 'Mitsubishi Electric FX5 Series Analog Module for iQ FX5 and FX5U PLCs, DC Analog I/O' -> описание 169 символов
+[16:30:23] ✓ ID 5: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapters and Extension Modules' -> описание 185 символов
+[16:30:23] ✅ Успешно сгенерировано 5 описаний
+[16:30:23] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:30:24] 
+🔄 Обработка пакета 17/40 (5 товаров)
+[16:30:24] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:31:01] ✓ ID 1: 'Mitsubishi Q Series Series PLC CPU for Use with MELSEC Q Series, 1024-Input' -> 'Mitsubishi Electric Q Series PLC CPU for MELSEC Q Series, 1024-Input' -> описание 231 символов
+[16:31:01] ✓ ID 2: 'Mitsubishi Electric CM300DY-13T#300G Dual IGBT Module, 300 A 600 V 94x48mm' -> 'Mitsubishi Electric CM300DY-13T#300G Dual IGBT Module, 300 A, 600 V, 94x48mm' -> описание 213 символов
+[16:31:01] ✓ ID 3: 'Mitsubishi G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Sink, Source, 5 V dc, 24 V dc' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC CPUs, Sink/Source, 5-24 V DC' -> описание 193 символов
+[16:31:01] ✓ ID 4: 'Mitsubishi Electric MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Analogue' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module (Analog)' -> описание 192 символов
+[16:31:01] ✓ ID 5: 'Mitsubishi Electric PM50CG1B120#300G 3 Phase Bridge IGBT Module, 50 1200 V Module, Panel Mount' -> 'Mitsubishi Electric PM50CG1B120#300G 3-Phase Bridge IGBT Module, 50 A, 1200 V, Panel Mount' -> описание 178 символов
+[16:31:01] ✅ Успешно сгенерировано 5 описаний
+[16:31:01] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:31:02] 
+🔄 Обработка пакета 18/40 (5 товаров)
+[16:31:02] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:31:47] ✓ ID 1: 'Mitsubishi Inverter Drive, 5.5 kW, 3 Phase, 400 V ac, 12 A, FR-D740 Series' -> 'Mitsubishi FR-D740 Series Inverter Drive, 5.5 kW, 3-Phase, 400V' -> описание 236 символов
+[16:31:47] ✓ ID 2: 'Mitsubishi Electric CM100DY-24T #300G Dual IGBT Module, 100 1200 V Module, PCB Mount' -> 'Mitsubishi CM100DY-24T #300G Dual IGBT Module, 100A, 1200V, PCB Mount' -> описание 215 символов
+[16:31:47] ✓ ID 3: 'Mitsubishi FX2N Series Series PLC I/O Module for Use with FX2N Series, Relay' -> 'Mitsubishi FX2N PLC I/O Module with Relay Outputs, FX2N Series' -> описание 196 символов
+[16:31:47] ✓ ID 4: 'Mitsubishi Communication Module for Use with CC Link Controller Network' -> 'Mitsubishi CC-Link Communication Module for Controller Network' -> описание 214 символов
+[16:31:47] ✓ ID 5: 'Mitsubishi Electric G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Sink, Source, 5 V dc, 24 V' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC CPUs, Sink/Source, 5VDC & 24V' -> описание 185 символов
+[16:31:47] ✅ Успешно сгенерировано 5 описаний
+[16:31:47] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:31:48] 
+🔄 Обработка пакета 19/40 (5 товаров)
+[16:31:48] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:32:26] ✓ ID 1: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter, FX5 Extension Module, Analog I/O' -> описание 193 символов
+[16:32:26] ✓ ID 2: 'Mitsubishi Electric RS232 USB A Male to D-sub, 9 Pin Male Converter Cable' -> 'Mitsubishi Electric RS232 USB A Male to D-Sub 9-Pin Male Converter Cable' -> описание 187 символов
+[16:32:26] ✓ ID 3: 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series' -> 'Mitsubishi Electric PLC Expansion Module for FX3U Series' -> описание 151 символов
+[16:32:26] ✓ ID 4: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 8 (Sink/Source)-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3S Series PLC CPU for FX3 Series, Relay Output, 8 I/O (Sink/Source)' -> описание 171 символов
+[16:32:26] ✓ ID 5: 'Mitsubishi Electric SNAP Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V' -> 'Mitsubishi Electric SNAP Series PLC I/O Module for FX5U/FX5UC, Relay and Transistor Outputs, 5 V' -> описание 168 символов
+[16:32:26] ✅ Успешно сгенерировано 5 описаний
+[16:32:26] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:32:27] 
+🔄 Обработка пакета 20/40 (5 товаров)
+[16:32:27] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:33:05] ✓ ID 1: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - Transistor Output, 16 Sink/Source Inputs' -> описание 209 символов
+[16:33:05] ✓ ID 2: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 36-Input, Sink, Source Input' -> 'Mitsubishi FX3G Series Logic Module, 12–24 V DC Supply, Relay Output, 36 Inputs (Sink/Source)' -> описание 228 символов
+[16:33:05] ✓ ID 3: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Sink) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - Transistor Output (Sink), 16 Sink/Source Inputs' -> описание 209 символов
+[16:33:05] ✓ ID 4: 'Mitsubishi Electric CM200DY-24T #300G Dual IGBT Module, 200 1200 V Module, PCB Mount' -> 'Mitsubishi CM200DY-24T #300G Dual IGBT Module, 200 A, 1200 V, PCB Mount' -> описание 226 символов
+[16:33:05] ✓ ID 5: 'Mitsubishi FX3U Series Interface Module for Use with FX Series' -> 'Mitsubishi FX3U Series Interface Module for FX Series' -> описание 211 символов
+[16:33:05] ✅ Успешно сгенерировано 5 описаний
+[16:33:05] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:33:06] 
+🔄 Обработка пакета 21/40 (5 товаров)
+[16:33:06] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:33:44] ✓ ID 1: 'Mitsubishi Electric Analog Input Module for Use with FX5U CPU Module, FX5UC CPU Module, Analogue, Digital, 24 V dc' -> 'Mitsubishi Electric Analog Input Module for FX5U/FX5UC (24 V DC) – Analog and Digital I/O' -> описание 227 символов
+[16:33:44] ✓ ID 2: 'Mitsubishi F2-40BL Series PLC Power Supply for Use with FX2N Series' -> 'Mitsubishi F2-40BL PLC Power Supply for FX2N Series' -> описание 199 символов
+[16:33:44] ✓ ID 3: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 12 (Sink/Source)-Input,' -> 'Mitsubishi Electric FX3S PLC CPU for FX3 Series – 12 I/O (Sink/Source) with Transistor Output' -> описание 193 символов
+[16:33:44] ✓ ID 4: 'Mitsubishi Electric FX3U Series Series PLC I/O Module for Use with FX3U Series' -> 'Mitsubishi Electric FX3U Series I/O Module for FX3U PLCs' -> описание 199 символов
+[16:33:44] ✓ ID 5: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive' -> описание 195 символов
+[16:33:44] ✅ Успешно сгенерировано 5 описаний
+[16:33:44] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:33:45] 
+🔄 Обработка пакета 22/40 (5 товаров)
+[16:33:45] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:34:09] ✓ ID 1: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S PLC CPU for FX3 Series – Transistor Output, 16 I/O (Sink/Source)' -> описание 240 символов
+[16:34:09] ✓ ID 2: 'Mitsubishi Electric CM300DY-24T #300G Dual IGBT Module, 300 1200 V Module, PCB Mount' -> 'Mitsubishi CM300DY-24T #300G Dual IGBT Module, 300A 1200V, PCB Mount' -> описание 218 символов
+[16:34:09] ✓ ID 3: 'Mitsubishi G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V dc, 24 V dc' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC – Relay & Transistor, 5V/24V DC' -> описание 201 символов
+[16:34:09] ✓ ID 4: 'Mitsubishi SNAP Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V dc, 24 V dc' -> 'Mitsubishi SNAP Series PLC I/O Module for FX5U/FX5UC – Relay & Transistor, 5V/24V DC' -> описание 185 символов
+[16:34:09] ✓ ID 5: 'Mitsubishi Inverter Drive, 0.75 kW, 1 Phase, 230 V ac, 4.2 A, FR-D720S Series' -> 'Mitsubishi FR-D720S Series Inverter Drive – 0.75 kW, 1-Phase, 230V AC, 4.2A' -> описание 191 символов
+[16:34:09] ✅ Успешно сгенерировано 5 описаний
+[16:34:09] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:34:10] 
+🔄 Обработка пакета 23/40 (5 товаров)
+[16:34:10] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:34:43] ✓ ID 1: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive' -> описание 205 символов
+[16:34:43] ✓ ID 2: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive' -> описание 211 символов
+[16:34:43] ✓ ID 3: 'Mitsubishi Electric Inverter Drive, 0.75 kW, 3 Phase, 400 V ac, 2.3 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 0.75 kW, 3-Phase, 400 V AC, 2.3 A, FR-F800 Series' -> описание 180 символов
+[16:34:43] ✓ ID 4: 'Mitsubishi Electric Counter for Use with FX3G Series' -> 'Mitsubishi Counter for Use with FX3G Series' -> описание 214 символов
+[16:34:43] ✓ ID 5: 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> описание 214 символов
+[16:34:43] ✅ Успешно сгенерировано 4 описаний
+[16:34:43] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:34:44] 
+🔄 Обработка пакета 24/40 (5 товаров)
+[16:34:44] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:35:14] ✓ ID 1: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC supply, Relay Output, 24 Inputs, Sink/Source' -> описание 188 символов
+[16:35:14] ✓ ID 2: 'Mitsubishi Electric CM450DY-24T #300G Dual IGBT Module, 450 1200 V Module, PCB Mount' -> 'Mitsubishi Electric CM450DY-24T #300G Dual IGBT Module, 450 A, 1200 V, PCB Mount' -> описание 213 символов
+[16:35:14] ✓ ID 3: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 14-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 VAC supply, Relay Output, 14 Inputs, Sink/Source' -> описание 186 символов
+[16:35:14] ✓ ID 4: 'Mitsubishi Electric PM100CG1B120#300G 3 Phase Bridge IGBT Module, 100 1200 V Module, Panel Mount' -> 'Mitsubishi Electric PM100CG1B120#300G 3-Phase Bridge IGBT Module, 100–1200 V, Panel Mount' -> описание 200 символов
+[16:35:14] ✓ ID 5: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Transistor Output, 14-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC supply, Transistor Output, 14 Inputs, Sink/Source' -> описание 198 символов
+[16:35:14] ✅ Успешно сгенерировано 5 описаний
+[16:35:14] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:35:15] 
+🔄 Обработка пакета 25/40 (5 товаров)
+[16:35:15] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:35:46] ❌ Ошибка парсинга JSON из ответа AI: Unterminated string starting at: line 6 column 22 (char 161)
+[16:35:46] Содержимое ответа: {
+  "descriptions": [
+    {
+      "id": 1,
+      "name": "Mitsubishi Electric CM450DX-13T#300G Dual IGBT Module, 450 A 600 V, 122 x 62 mm",
+      "description": "Powerful dual IGBT module for high‑duty drives. 450 A at 600 V in a compact 122 x 62 mm package. Ideal for motor drives, inverters, and...
+[16:35:46] ❌ Ошибка генерации для пакета 25
+[16:35:46] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:35:47] 
+🔄 Обработка пакета 26/40 (5 товаров)
+[16:35:47] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:36:28] ✓ ID 1: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 8-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 V AC Supply, Relay Output, 8-Input, Sink/Source' -> описание 216 символов
+[16:36:28] ✓ ID 2: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Relay Output, 40-Input, Sink/Source' -> описание 209 символов
+[16:36:28] ✓ ID 3: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Transistor Output, 24-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC Supply, Transistor Output, 24-Input, Sink/Source' -> описание 203 символов
+[16:36:28] ✓ ID 4: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 V AC Supply, Relay Output, 24-Input, Sink/Source' -> описание 192 символов
+[16:36:28] ✓ ID 5: 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 400 V ac, 3.8 A, FR-F800 Series' -> 'Mitsubishi Electric FR-F800 Series Inverter Drive, 1.5 kW, 3-Phase, 400 V AC' -> описание 200 символов
+[16:36:28] ✅ Успешно сгенерировано 5 описаний
+[16:36:28] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:36:29] 
+🔄 Обработка пакета 27/40 (5 товаров)
+[16:36:29] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:36:55] ✓ ID 1: 'Mitsubishi Electric Inverter Drive, 11 kW, 3 Phase, 380 → 480 V ac, 23 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 11 kW FR-CS80 Series (3-Phase, 380–480 V)' -> описание 195 символов
+[16:36:55] ✓ ID 2: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 8-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module (8-Input, Relay Output, 100–240 V AC)' -> описание 179 символов
+[16:36:55] ✓ ID 3: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 3 Phase, 380 → 480 V ac, 1.2 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 0.4 kW FR-CS80 Series (3-Phase, 380–480 V)' -> описание 165 символов
+[16:36:55] ✓ ID 4: 'Mitsubishi Electric Inverter Drive, 15 kW, 3 Phase, 380 → 480 V ac, 29.5 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 15 kW FR-CS80 Series (3-Phase, 380–480 V)' -> описание 173 символов
+[16:36:55] ✓ ID 5: 'Mitsubishi Electric Alpha 2 Series Logic Module, 24 V dc Supply, Relay Output, 8-Input, Analogue Input' -> 'Mitsubishi Electric Alpha 2 Series Logic Module (8-Input, Analogue Input, 24 V DC)' -> описание 156 символов
+[16:36:55] ✅ Успешно сгенерировано 5 описаний
+[16:36:55] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:36:56] 
+🔄 Обработка пакета 28/40 (5 товаров)
+[16:36:56] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:37:18] ✓ ID 1: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 380 → 480 V ac, 8 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 3.7 kW, 3-Phase, 380-480 V AC, 8 A, FR-CS80 Series' -> описание 203 символов
+[16:37:18] ✓ ID 2: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8 A, FR-D740 Series' -> 'Mitsubishi Electric Inverter Drive 3.7 kW, 3-Phase, 400 V AC, 8 A, FR-D740 Series' -> описание 153 символов
+[16:37:18] ✓ ID 3: 'Mitsubishi Electric Inverter Drive, 11 kW, 3 Phase, 400 V ac, 25 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive 11 kW, 3-Phase, 400 V AC, 25 A, FR-F800 Series' -> описание 171 символов
+[16:37:18] ✓ ID 4: 'Mitsubishi Electric Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5.2 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive 2.2 kW, 3-Phase, 400 V AC, 5.2 A, FR-F800 Series' -> описание 150 символов
+[16:37:18] ✓ ID 5: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 180 символов
+[16:37:18] ✅ Успешно сгенерировано 5 описаний
+[16:37:18] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:37:19] 
+🔄 Обработка пакета 29/40 (5 товаров)
+[16:37:19] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:37:47] ✓ ID 1: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 235 символов
+[16:37:47] ✓ ID 2: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 242 символов
+[16:37:47] ✓ ID 3: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 231 символов
+[16:37:47] ✓ ID 4: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 220 символов
+[16:37:47] ✓ ID 5: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 221 символов
+[16:37:47] ✅ Успешно сгенерировано 1 описаний
+[16:37:47] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:37:48] 
+🔄 Обработка пакета 30/40 (5 товаров)
+[16:37:48] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:38:14] ✓ ID 1: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 230 символов
+[16:38:14] ✓ ID 2: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 230 символов
+[16:38:14] ✓ ID 3: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 213 символов
+[16:38:14] ✓ ID 4: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 207 символов
+[16:38:14] ✓ ID 5: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 16-Input, Sink, Source Input' -> описание 223 символов
+[16:38:14] ✅ Успешно сгенерировано 2 описаний
+[16:38:14] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:38:15] 
+🔄 Обработка пакета 31/40 (5 товаров)
+[16:38:15] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:38:39] ✓ ID 1: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 215 символов
+[16:38:39] ✓ ID 2: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 193 символов
+[16:38:39] ✓ ID 3: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 189 символов
+[16:38:39] ✓ ID 4: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> описание 175 символов
+[16:38:39] ✓ ID 5: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Transistor Output, 24-Input, Sink, Source Input' -> описание 195 символов
+[16:38:39] ✅ Успешно сгенерировано 2 описаний
+[16:38:39] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:38:40] 
+🔄 Обработка пакета 32/40 (5 товаров)
+[16:38:40] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:39:09] ✓ ID 1: 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 10.4 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 10.4 in, TFT LCD Display, 800 x 600' -> описание 228 символов
+[16:39:09] ✓ ID 2: 'Mitsubishi Electric Touch Screen HMI - 12.1 in, TFT Display, 800 x 600' -> 'Mitsubishi Electric Touch Screen HMI - 12.1 in, TFT Display, 800 x 600' -> описание 241 символов
+[16:39:09] ✓ ID 3: 'Mitsubishi GT27 Series GOT2000 Touch Screen HMI - 12.1 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi GT27 Series GOT2000 Touch Screen HMI - 12.1 in, TFT LCD Display, 800 x 600' -> описание 205 символов
+[16:39:09] ✓ ID 4: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 40-Input, Sink, Source Input' -> описание 218 символов
+[16:39:09] ✓ ID 5: 'Mitsubishi Electric Inverter Drive, 22 kW, 3 Phase, 400 V ac, 47 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 22 kW, 3 Phase, 400 V ac, 47 A, FR-F800 Series' -> описание 214 символов
+[16:39:09] ✅ Успешно сгенерировано 5 описаний
+[16:39:09] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:39:10] 
+🔄 Обработка пакета 33/40 (5 товаров)
+[16:39:10] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:39:35] ✓ ID 1: 'Mitsubishi Electric Protective Cover For Use With HMI GOT, GT21 Wide, GT25 Wide' -> 'Mitsubishi Electric Protective Cover for HMI GOT GT21 Wide and GT25 Wide' -> описание 181 символов
+[16:39:35] ✓ ID 2: 'Mitsubishi PLC Programming Software for Use with GT Soft GOT 2000' -> 'Mitsubishi PLC Programming Software for GT Soft GOT 2000' -> описание 183 символов
+[16:39:35] ✓ ID 3: 'Mitsubishi Electric FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 32-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module - 24V DC Supply, 32 Inputs (Sink/Source) with Transistor Output' -> описание 161 символов
+[16:39:35] ✓ ID 4: 'Mitsubishi Electric Inverter Drive, 2.2 kW, 3 Phase, 380 → 480 V ac, 5 A, FR-CS80 Series' -> 'Mitsubishi Electric FR-CS80 Series Inverter Drive 2.2 kW (3-Phase, 380–480 V)' -> описание 180 символов
+[16:39:35] ✓ ID 5: 'Mitsubishi Electric FR-LU08 LCD Display with Keypad' -> 'Mitsubishi Electric FR-LU08 LCD Display with Keypad' -> описание 182 символов
+[16:39:35] ✅ Успешно сгенерировано 5 описаний
+[16:39:35] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:39:36] 
+🔄 Обработка пакета 34/40 (5 товаров)
+[16:39:36] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:40:36] ❌ Таймаут запроса к AI API
+[16:40:36] ❌ Ошибка генерации для пакета 34
+[16:40:36] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:40:37] 
+🔄 Обработка пакета 35/40 (5 товаров)
+[16:40:37] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:41:02] ✓ ID 1: 'Mitsubishi PLC Programming Software for Use with FX PLC Series' -> 'Mitsubishi PLC Programming Software for FX Series' -> описание 218 символов
+[16:41:02] ✓ ID 2: 'Mitsubishi Electric Touch Screen HMI - 10.4 in, TFT Display, 640 x 480' -> 'Mitsubishi Electric 10.4-inch TFT Touch Screen HMI (640x480)' -> описание 215 символов
+[16:41:02] ✓ ID 3: 'Mitsubishi Electric GT25 Series GOT2000 Touch Screen HMI - 7 in, LCD Display, 800 x 480' -> 'Mitsubishi GOT2000 GT25 7-inch Touch Screen HMI (800x480)' -> описание 191 символов
+[16:41:02] ✓ ID 4: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module (24V DC, 16 Inputs, Relay Output)' -> описание 188 символов
+[16:41:02] ✓ ID 5: 'Mitsubishi Electric MAM-232ADP/BROWN Whip WiFi Antenna' -> 'Mitsubishi MAM-232ADP/BROWN WiFi Antenna' -> описание 175 символов
+[16:41:02] ✅ Успешно сгенерировано 5 описаний
+[16:41:02] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:41:03] 
+🔄 Обработка пакета 36/40 (5 товаров)
+[16:41:03] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:41:32] ✓ ID 1: 'Mitsubishi Electric MAM-ANT-5M Whip WiFi Antenna' -> 'Mitsubishi Electric MAM-ANT-5M Whip WiFi Antenna' -> описание 201 символов
+[16:41:32] ✓ ID 2: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input' -> описание 190 символов
+[16:41:32] ✓ ID 3: 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 15 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 15 in, TFT LCD Display, 800 x 600' -> описание 194 символов
+[16:41:32] ✓ ID 4: 'Mitsubishi PLC Programming Software for Use with GT25 Series' -> 'Mitsubishi PLC Programming Software for Use with GT25 Series' -> описание 185 символов
+[16:41:32] ✓ ID 5: 'Mitsubishi Electric Inverter Module, 1.5 kW, 1 Phase, 240 V, 8 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 1.5 kW, 1 Phase, 240 V, 8 A, FR-E800 Series' -> описание 196 символов
+[16:41:32] ✅ Успешно сгенерировано 5 описаний
+[16:41:32] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:41:33] 
+🔄 Обработка пакета 37/40 (5 товаров)
+[16:41:33] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:42:25] ✓ ID 1: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 36-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 36-Input (Sink/Source)' -> описание 205 символов
+[16:42:25] ✓ ID 2: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 14-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 14-Input, Sink, Source' -> описание 191 символов
+[16:42:25] ✓ ID 3: 'Mitsubishi GT21 Series GOT Touch Screen HMI - 4.3 in, TFT Display' -> 'Mitsubishi GT21 Series GOT Touch Screen HMI, 4.3 in TFT Display' -> описание 199 символов
+[16:42:25] ✓ ID 4: 'Mitsubishi Inverter Drive, 7.5 kW, 3 Phase, 400 V ac, 16 A, FR-D740 Series' -> 'Mitsubishi FR-D740 Series Inverter Drive, 7.5 kW, 3-Phase, 400 V AC, 16 A' -> описание 176 символов
+[16:42:25] ✓ ID 5: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 32-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Relay Output, 32-Input, Sink, Source Input' -> описание 177 символов
+[16:42:25] ✅ Успешно сгенерировано 5 описаний
+[16:42:25] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:42:26] 
+🔄 Обработка пакета 38/40 (5 товаров)
+[16:42:26] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:42:58] ✓ ID 1: 'Mitsubishi PLC Programming Software for Use with FX PLC Series' -> 'Mitsubishi PLC Programming Software for Use with FX PLC Series' -> описание 184 символов
+[16:42:58] ✓ ID 2: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 1 Phase, 200 → 240 V ac, 2.5 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 0.4 kW, 1 Phase, 200 → 240 V ac, 2.5 A, FR-CS80 Series' -> описание 165 символов
+[16:42:58] ✓ ID 3: 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> описание 170 символов
+[16:42:58] ✓ ID 4: 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> описание 153 символов
+[16:42:58] ✓ ID 5: 'Mitsubishi Electric FX3 Series FX3G Series, FX3GE Series HMI Panel -, STN LCD Display' -> 'Mitsubishi Electric FX3 Series FX3G Series, FX3GE Series HMI Panel -, STN LCD Display' -> описание 144 символов
+[16:42:58] ✅ Успешно сгенерировано 5 описаний
+[16:42:58] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:42:59] 
+🔄 Обработка пакета 39/40 (5 товаров)
+[16:42:59] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:43:33] ✓ ID 1: 'Mitsubishi PLC Expansion Module Memory Cassette Memory 64 kB 20 x 37 x 6.1 mm' -> 'Mitsubishi PLC Expansion Module Memory Cassette Memory 64 kB 20 x 37 x 6.1 mm' -> описание 205 символов
+[16:43:33] ✓ ID 2: 'Mitsubishi FX3U Series Series PLC I/O Module for Use with FX3U Series, Analogue, J Type, K Type, Digital, J Type, K Type' -> 'Mitsubishi FX3U Series PLC I/O Module for FX3U PLCs - Analog, Digital, J Type, K Type' -> описание 191 символов
+[16:43:33] ✓ ID 3: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 8-Input, Sink, Source' -> 'Mitsubishi FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 8-Input (Sink/Source)' -> описание 189 символов
+[16:43:33] ✓ ID 4: 'Mitsubishi GT21 Series GOT Touch Screen HMI - 3.8 in, TFT LCD Display' -> 'Mitsubishi GT21 Series GOT Touch Screen HMI - 3.8 in TFT LCD' -> описание 185 символов
+[16:43:33] ✓ ID 5: 'Mitsubishi Electric Inverter Module, 5.5 kW, 3 Phase, 480 V, 12 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series Inverter Module, 5.5 kW, 3-Phase 480 V, 12 A' -> описание 169 символов
+[16:43:33] ✅ Успешно сгенерировано 5 описаний
+[16:43:33] ⏳ Ожидание 1.0 сек. перед следующим пакетом...
+[16:43:34] 
+🔄 Обработка пакета 40/40 (5 товаров)
+[16:43:34] 🤖 Отправка запроса к AI API (модель: openai/gpt-5-nano, температура: 0.7)
+[16:44:05] ✓ ID 1: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 6-Input, DC Input' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - Relay/Transistor Output, 6-Input, DC Input' -> описание 245 символов
+[16:44:05] ✓ ID 2: 'Mitsubishi GT21 Series GOT2000 Touch Screen HMI - 3.8 in, LCD Display' -> 'Mitsubishi GT21 Series GOT2000 3.8 in Touch Screen HMI' -> описание 229 символов
+[16:44:05] ✓ ID 3: 'Mitsubishi Electric Evaluation Kit SiC MOSFET for EVA11-SDIP for DIPIPM modules' -> 'Mitsubishi Electric SiC MOSFET Evaluation Kit for EVA11-SDIP DIPIPM Modules' -> описание 227 символов
+[16:44:05] ✓ ID 4: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog' -> описание 189 символов
+[16:44:05] ✓ ID 5: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 16-Input, DC Input' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - 16-Input, DC Input, Relay/Transistor Output' -> описание 188 символов
+[16:44:05] ✅ Успешно сгенерировано 5 описаний
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 36-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 36-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 0.75 kW, 1 Phase, 200 → 240 V ac, 4.2 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 0.75 kW, 1 Phase, 200 → 240 V ac, 4.2 A, FR-CS80 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 14-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 14-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 1.5 kW, 3 Phase, 480 V, 4 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 1.5 kW, 3 Phase, 480 V, 4 A, FR-E800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 380 → 480 V ac, 3.6 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 380 → 480 V ac, 3.6 A, FR-CS80 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5 A, FR-D740 Series' -> 'Mitsubishi Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5 A, FR-D740 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 15 kW, 3 Phase, 480 V, 41 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 15 kW, 3 Phase, 480 V, 41 A, FR-E800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PLC Cable for Use with QC Series' -> 'Mitsubishi Electric PLC Cable for Use with QC Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Expansion Module for Use with FX2N Series, Analogue, Digital' -> 'Mitsubishi PLC Expansion Module for Use with FX2N Series, Analog & Digital'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 12 (Sink/Source)-Input, Sink, Source' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 12 I/O (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Q Controller Series Base Unit for Use with MELSEC Q Series' -> 'Mitsubishi Electric Q Controller Series Base Unit for MELSEC Q Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX5 Series Analogue Module for Use with iQ FX5 PLC, iQ FX5U PLC, DC' -> 'Mitsubishi Electric FX5 Series Analog Module for iQ FX5 and FX5U PLCs, DC Analog I/O'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital' -> 'Mitsubishi MELSEC Q Series PLC Digital I/O Module'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC connection cable 1m For Use With HMI CPU (MELSEC FX series), GOT1000 Series' -> 'Mitsubishi PLC Connection Cable 1m for HMI CPU (MELSEC FX Series), GOT1000 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 64-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 64-Input (Sink/Source), 100-240V AC, Relay Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Alpha 2 Series Logic Module, 100 → 240 V ac Supply, Relay Output, 6-Input, Digital Input' -> 'Mitsubishi Electric Alpha 2 Series Logic Module - 6-Input Digital, 100-240V AC, Relay Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 16-Input (Sink/Source), 100-240V AC, Relay Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module - 24-Input (Sink/Source), 100-240V AC, Relay Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 2.2 kW, 3 Phase, 480 V, 6 A, FR-E800 Series' -> 'Mitsubishi Electric FR-E800 Inverter Module - 2.2 kW, 3-Phase, 480V, 6A'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 16-Input, DC Input' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - 16-Input, DC Input, Relay/Transistor Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 7.5 kW, 3 Phase, 380 → 480 V ac, 16 A, FR-CS80 Series' -> 'Mitsubishi FR-CS80 Inverter Drive – 7.5 kW, 3-Phase, 380–480V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Q61 Series PLC Power Supply for Use with PSU Series, Q Series' -> 'Mitsubishi Q61 Series PLC Power Supply for Q Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 0.4 kW, 3 Phase, 480 V, 1.6 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series Inverter Module – 0.4 kW, 3-Phase, 480V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric GT25 Series GOT2000 Touch Screen HMI - 10.1 in, LCD Display, 1280 x 800' -> 'Mitsubishi GT25 Series GOT2000 10.1-inch HMI'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 7.5 kW, 3 Phase, 400 V ac, 17 A, FR-F800 Series' -> 'Mitsubishi Electric FR-F800 7.5 kW Inverter Drive (3-Phase, 400V, 17A)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 0.4 kW, 1 Phase, 230 V ac, 2.5 A, FR-D720S Series' -> 'Mitsubishi FR-D720S Series 0.4 kW Inverter Drive (1-Phase, 230V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series PLC Power Supply for Use with MELSEC Series' -> 'Mitsubishi FX3U Series PLC Power Supply for MELSEC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 0.75 kW, 1 Phase, 240 V, 5 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series 0.75 kW Inverter Module (1-Phase, 240V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Transistor' -> 'Mitsubishi MELSEC Q Series Digital I/O Module (Transistor Output)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Analogue' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module – Digital & Analog I/O'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Q Controller Series Base Unit for Use with MELSEC Q Series' -> 'Mitsubishi Electric Q Controller Series Base Unit for MELSEC Q Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Digital, Relay' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module – Digital & Relay I/O'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PLC Programming Software for Use with GOT Series HMI's' -> 'Mitsubishi Electric PLC Programming Software for GOT Series HMI'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 3 Phase, 400 V ac, 1.2 A, FR-D740 Series' -> 'Mitsubishi Electric FR-D740 Series Inverter Drive – 0.4 kW, 3-Phase, 400V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 32-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module, 100-240 VAC Supply, Relay Output, 32-Input, Sink/Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Transistor' -> 'Mitsubishi MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Transistor Outputs'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 6-Input, DC Input' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay/Transistor Output, 6-Input, DC Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi GT21 Series GOT2000 Touch Screen HMI - 3.8 in, LCD Display' -> 'Mitsubishi GT21 Series GOT2000 3.8 in Touch Screen HMI'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Transistor Output, 40-Input, Sink/Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM100RX-24T #300G 3 Phase Bridge IGBT Module, 100 1200 V Module, PCB Mount' -> 'Mitsubishi Electric CM100RX-24T #300G 3 Phase Bridge IGBT Module, 100 A 1200 V Module, PCB Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 16-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,' -> 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-PA07 Parameter Unit' -> 'Mitsubishi Electric FR-PA07 Parameter Unit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,' -> 'Mitsubishi FX5U Series PLC CPU for Use with MELSEC IQ-F Series IQ Platform-Compatible PLC, Relay, Transistor Output,'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8.3 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8.3 A, FR-F800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 3.7 kW, 3 Phase, 480 V, 9.5 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 3.7 kW, 3 Phase, 480 V, 9.5 A, FR-E800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Programming Software GT Designer For Use With HMI GOT' -> 'Mitsubishi Electric Programming Software GT Designer For Use With HMI GOT'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC Q Series Extension Base for Use with MELSEC Q Series' -> 'Mitsubishi Electric MELSEC Q Series Extension Base for Use with MELSEC Q Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source' -> 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 16 (Sink/Source)-Input, Sink, Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Cable 3m For Use With HMI GT1040-QBBD, GT1045-QSBD, GT1050-QBBD, GT1055-QSBD, PLC FX1-3 Series' -> 'Mitsubishi 3m Cable for HMI GT1040-QBBD, GT1045-QSBD, GT1050-QBBD, GT1055-QSBD and FX1-3 Series PLC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM100DY-13T#300G Dual IGBT Module, 100 A 600 V 94x34mm' -> 'Mitsubishi Electric CM100DY-13T#300G Dual IGBT Module, 100 A 600 V, 94x34 mm'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Q Series Series PLC CPU for Use with MELSEC Q Series, 1024-Input' -> 'Mitsubishi Electric Q Series PLC CPU for MELSEC Q Series, 1024-Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Touch Screen HMI - 10.4 in, TFT Display, 640 x 480' -> 'Mitsubishi Electric 10.4-inch TFT Touch Screen HMI (640x480)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Programming Software for Use with MELSEC iQ-F Series Programmable Controllers, MELSEC iQ-R Series' -> 'Mitsubishi PLC Programming Software for MELSEC iQ-F Series and iQ-R Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 0.1 kW, 1 Phase, 230 V ac, 800 mA, FR-D720S Series' -> 'Mitsubishi FR-D720S Inverter Drive, 0.1 kW, 1-Phase, 230V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PLC I/O Module for Use with MELSEC iQ-F Series PLC, DC, Transistor, 24 V dc' -> 'Mitsubishi Electric I/O Module for MELSEC iQ-F PLCs, DC, Transistor Outputs, 24 V DC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX5 Series Analogue Module for Use with iQ FX5 PLC, iQ FX5U PLC, DC' -> 'Mitsubishi Electric FX5 Series Analog Module for iQ FX5 and FX5U PLCs, DC Analog I/O'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Q Series Series PLC CPU for Use with MELSEC Q Series, 1024-Input' -> 'Mitsubishi Electric Q Series PLC CPU for MELSEC Q Series, 1024-Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM300DY-13T#300G Dual IGBT Module, 300 A 600 V 94x48mm' -> 'Mitsubishi Electric CM300DY-13T#300G Dual IGBT Module, 300 A, 600 V, 94x48mm'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Sink, Source, 5 V dc, 24 V dc' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC CPUs, Sink/Source, 5-24 V DC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC Q Series PLC I/O Module for Use with MELSEC Q Series, Analogue' -> 'Mitsubishi Electric MELSEC Q Series PLC I/O Module (Analog)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PM50CG1B120#300G 3 Phase Bridge IGBT Module, 50 1200 V Module, Panel Mount' -> 'Mitsubishi Electric PM50CG1B120#300G 3-Phase Bridge IGBT Module, 50 A, 1200 V, Panel Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 5.5 kW, 3 Phase, 400 V ac, 12 A, FR-D740 Series' -> 'Mitsubishi FR-D740 Series Inverter Drive, 5.5 kW, 3-Phase, 400V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM100DY-24T #300G Dual IGBT Module, 100 1200 V Module, PCB Mount' -> 'Mitsubishi CM100DY-24T #300G Dual IGBT Module, 100A, 1200V, PCB Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX2N Series Series PLC I/O Module for Use with FX2N Series, Relay' -> 'Mitsubishi FX2N PLC I/O Module with Relay Outputs, FX2N Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Communication Module for Use with CC Link Controller Network' -> 'Mitsubishi CC-Link Communication Module for Controller Network'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Sink, Source, 5 V dc, 24 V' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC CPUs, Sink/Source, 5VDC & 24V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric RS232 USB A Male to D-sub, 9 Pin Male Converter Cable' -> 'Mitsubishi Electric RS232 USB A Male to D-Sub 9-Pin Male Converter Cable'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series' -> 'Mitsubishi Electric PLC Expansion Module for FX3U Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Relay Output, 8 (Sink/Source)-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3S Series PLC CPU for FX3 Series, Relay Output, 8 I/O (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric SNAP Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V' -> 'Mitsubishi Electric SNAP Series PLC I/O Module for FX5U/FX5UC, Relay and Transistor Outputs, 5 V'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S PLC CPU for FX3 Series – Transistor Output, 16 I/O (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 36-Input, Sink, Source Input' -> 'Mitsubishi FX3G Series Logic Module, 12–24 V DC Supply, Relay Output, 36 Inputs (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Sink) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - Transistor Output (Sink), 16 Sink/Source Inputs'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM200DY-24T #300G Dual IGBT Module, 200 1200 V Module, PCB Mount' -> 'Mitsubishi CM200DY-24T #300G Dual IGBT Module, 200 A, 1200 V, PCB Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Interface Module for Use with FX Series' -> 'Mitsubishi FX3U Series Interface Module for FX Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Analog Input Module for Use with FX5U CPU Module, FX5UC CPU Module, Analogue, Digital, 24 V dc' -> 'Mitsubishi Electric Analog Input Module for FX5U/FX5UC (24 V DC) – Analog and Digital I/O'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi F2-40BL Series PLC Power Supply for Use with FX2N Series' -> 'Mitsubishi F2-40BL PLC Power Supply for FX2N Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 12 (Sink/Source)-Input,' -> 'Mitsubishi Electric FX3S PLC CPU for FX3 Series – 12 I/O (Sink/Source) with Transistor Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3U Series Series PLC I/O Module for Use with FX3U Series' -> 'Mitsubishi Electric FX3U Series I/O Module for FX3U PLCs'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3S Series PLC CPU for Use with FX3 Series, Transistor (Source) Output, 16 (Sink/Source)-Input,' -> 'Mitsubishi FX3S PLC CPU for FX3 Series – Transistor Output, 16 I/O (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM300DY-24T #300G Dual IGBT Module, 300 1200 V Module, PCB Mount' -> 'Mitsubishi CM300DY-24T #300G Dual IGBT Module, 300A 1200V, PCB Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi G4 Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V dc, 24 V dc' -> 'Mitsubishi G4 Series PLC I/O Module for FX5U/FX5UC – Relay & Transistor, 5V/24V DC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi SNAP Series PLC I/O Module for Use with FX5U CPU Module, FX5UC CPU Module, Relay, Transistor, 5 V dc, 24 V dc' -> 'Mitsubishi SNAP Series PLC I/O Module for FX5U/FX5UC – Relay & Transistor, 5V/24V DC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 0.75 kW, 1 Phase, 230 V ac, 4.2 A, FR-D720S Series' -> 'Mitsubishi FR-D720S Series Inverter Drive – 0.75 kW, 1-Phase, 230V AC, 4.2A'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive' -> 'Mitsubishi Electric Inverter Drive'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 0.75 kW, 3 Phase, 400 V ac, 2.3 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 0.75 kW, 3-Phase, 400 V AC, 2.3 A, FR-F800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Counter for Use with FX3G Series' -> 'Mitsubishi Counter for Use with FX3G Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage' -> 'Mitsubishi FX5 Series Communication Module for Use with FX5U CPU Module, FX5UC CPU Module, Current, Voltage'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC supply, Relay Output, 24 Inputs, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric CM450DY-24T #300G Dual IGBT Module, 450 1200 V Module, PCB Mount' -> 'Mitsubishi Electric CM450DY-24T #300G Dual IGBT Module, 450 A, 1200 V, PCB Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 14-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 VAC supply, Relay Output, 14 Inputs, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PM100CG1B120#300G 3 Phase Bridge IGBT Module, 100 1200 V Module, Panel Mount' -> 'Mitsubishi Electric PM100CG1B120#300G 3-Phase Bridge IGBT Module, 100–1200 V, Panel Mount'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Transistor Output, 14-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC supply, Transistor Output, 14 Inputs, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 8-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 V AC Supply, Relay Output, 8-Input, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Relay Output, 40-Input, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 12 → 24 V dc Supply, Transistor Output, 24-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 12–24 V DC Supply, Transistor Output, 24-Input, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3G Series Logic Module, 100–240 V AC Supply, Relay Output, 24-Input, Sink/Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 1.5 kW, 3 Phase, 400 V ac, 3.8 A, FR-F800 Series' -> 'Mitsubishi Electric FR-F800 Series Inverter Drive, 1.5 kW, 3-Phase, 400 V AC'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 11 kW, 3 Phase, 380 → 480 V ac, 23 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 11 kW FR-CS80 Series (3-Phase, 380–480 V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 8-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module (8-Input, Relay Output, 100–240 V AC)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 3 Phase, 380 → 480 V ac, 1.2 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 0.4 kW FR-CS80 Series (3-Phase, 380–480 V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 15 kW, 3 Phase, 380 → 480 V ac, 29.5 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 15 kW FR-CS80 Series (3-Phase, 380–480 V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Alpha 2 Series Logic Module, 24 V dc Supply, Relay Output, 8-Input, Analogue Input' -> 'Mitsubishi Electric Alpha 2 Series Logic Module (8-Input, Analogue Input, 24 V DC)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 380 → 480 V ac, 8 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive 3.7 kW, 3-Phase, 380-480 V AC, 8 A, FR-CS80 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 3.7 kW, 3 Phase, 400 V ac, 8 A, FR-D740 Series' -> 'Mitsubishi Electric Inverter Drive 3.7 kW, 3-Phase, 400 V AC, 8 A, FR-D740 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 11 kW, 3 Phase, 400 V ac, 25 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive 11 kW, 3-Phase, 400 V AC, 25 A, FR-F800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 2.2 kW, 3 Phase, 400 V ac, 5.2 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive 2.2 kW, 3-Phase, 400 V AC, 5.2 A, FR-F800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 16-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-CS80 EMC Filter Kit' -> 'Mitsubishi Electric FR-CS80 EMC Filter Kit'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Transistor Output, 24-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 10.4 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 10.4 in, TFT LCD Display, 800 x 600'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Touch Screen HMI - 12.1 in, TFT Display, 800 x 600' -> 'Mitsubishi Electric Touch Screen HMI - 12.1 in, TFT Display, 800 x 600'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi GT27 Series GOT2000 Touch Screen HMI - 12.1 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi GT27 Series GOT2000 Touch Screen HMI - 12.1 in, TFT LCD Display, 800 x 600'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 40-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 100 → 240 V ac Supply, Relay Output, 40-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 22 kW, 3 Phase, 400 V ac, 47 A, FR-F800 Series' -> 'Mitsubishi Electric Inverter Drive, 22 kW, 3 Phase, 400 V ac, 47 A, FR-F800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Protective Cover For Use With HMI GOT, GT21 Wide, GT25 Wide' -> 'Mitsubishi Electric Protective Cover for HMI GOT GT21 Wide and GT25 Wide'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Programming Software for Use with GT Soft GOT 2000' -> 'Mitsubishi PLC Programming Software for GT Soft GOT 2000'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3U Series Logic Module, 24 V dc Supply, Transistor Output, 32-Input, Sink, Source Input' -> 'Mitsubishi Electric FX3U Series Logic Module - 24V DC Supply, 32 Inputs (Sink/Source) with Transistor Output'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 2.2 kW, 3 Phase, 380 → 480 V ac, 5 A, FR-CS80 Series' -> 'Mitsubishi Electric FR-CS80 Series Inverter Drive 2.2 kW (3-Phase, 380–480 V)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FR-LU08 LCD Display with Keypad' -> 'Mitsubishi Electric FR-LU08 LCD Display with Keypad'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Programming Software for Use with FX PLC Series' -> 'Mitsubishi PLC Programming Software for Use with FX PLC Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Touch Screen HMI - 10.4 in, TFT Display, 640 x 480' -> 'Mitsubishi Electric 10.4-inch TFT Touch Screen HMI (640x480)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric GT25 Series GOT2000 Touch Screen HMI - 7 in, LCD Display, 800 x 480' -> 'Mitsubishi GOT2000 GT25 7-inch Touch Screen HMI (800x480)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 16-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module (24V DC, 16 Inputs, Relay Output)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MAM-232ADP/BROWN Whip WiFi Antenna' -> 'Mitsubishi MAM-232ADP/BROWN WiFi Antenna'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MAM-ANT-5M Whip WiFi Antenna' -> 'Mitsubishi Electric MAM-ANT-5M Whip WiFi Antenna'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 24-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 15 in, TFT LCD Display, 800 x 600' -> 'Mitsubishi Electric GT27 Series GOT2000 Touch Screen HMI - 15 in, TFT LCD Display, 800 x 600'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Programming Software for Use with GT25 Series' -> 'Mitsubishi PLC Programming Software for Use with GT25 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 1.5 kW, 1 Phase, 240 V, 8 A, FR-E800 Series' -> 'Mitsubishi Electric Inverter Module, 1.5 kW, 1 Phase, 240 V, 8 A, FR-E800 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 36-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 36-Input (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 14-Input, Sink, Source' -> 'Mitsubishi Electric FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 14-Input, Sink, Source'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi GT21 Series GOT Touch Screen HMI - 4.3 in, TFT Display' -> 'Mitsubishi GT21 Series GOT Touch Screen HMI, 4.3 in TFT Display'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Inverter Drive, 7.5 kW, 3 Phase, 400 V ac, 16 A, FR-D740 Series' -> 'Mitsubishi FR-D740 Series Inverter Drive, 7.5 kW, 3-Phase, 400 V AC, 16 A'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Logic Module, 24 V dc Supply, Relay Output, 32-Input, Sink, Source Input' -> 'Mitsubishi FX3U Series Logic Module, 24 V DC Supply, Relay Output, 32-Input, Sink, Source Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Programming Software for Use with FX PLC Series' -> 'Mitsubishi PLC Programming Software for Use with FX PLC Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Drive, 0.4 kW, 1 Phase, 200 → 240 V ac, 2.5 A, FR-CS80 Series' -> 'Mitsubishi Electric Inverter Drive, 0.4 kW, 1 Phase, 200 → 240 V ac, 2.5 A, FR-CS80 Series'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi Electric PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor' -> 'Mitsubishi PLC Expansion Module for Use with FX3U Series, Digital, Relay, Transistor'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3 Series FX3G Series, FX3GE Series HMI Panel -, STN LCD Display' -> 'Mitsubishi Electric FX3 Series FX3G Series, FX3GE Series HMI Panel -, STN LCD Display'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi PLC Expansion Module Memory Cassette Memory 64 kB 20 x 37 x 6.1 mm' -> 'Mitsubishi PLC Expansion Module Memory Cassette Memory 64 kB 20 x 37 x 6.1 mm'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3U Series Series PLC I/O Module for Use with FX3U Series, Analogue, J Type, K Type, Digital, J Type, K Type' -> 'Mitsubishi FX3U Series PLC I/O Module for FX3U PLCs - Analog, Digital, J Type, K Type'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric FX3G Series Logic Module, 100 → 240 V ac Supply, Transistor Output, 8-Input, Sink, Source' -> 'Mitsubishi FX3G Series Logic Module, 100-240 V AC Supply, Transistor Output, 8-Input (Sink/Source)'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi GT21 Series GOT Touch Screen HMI - 3.8 in, TFT LCD Display' -> 'Mitsubishi GT21 Series GOT Touch Screen HMI - 3.8 in TFT LCD'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Inverter Module, 5.5 kW, 3 Phase, 480 V, 12 A, FR-E800 Series' -> 'Mitsubishi FR-E800 Series Inverter Module, 5.5 kW, 3-Phase 480 V, 12 A'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 6-Input, DC Input' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - Relay/Transistor Output, 6-Input, DC Input'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi GT21 Series GOT2000 Touch Screen HMI - 3.8 in, LCD Display' -> 'Mitsubishi GT21 Series GOT2000 3.8 in Touch Screen HMI'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric Evaluation Kit SiC MOSFET for EVA11-SDIP for DIPIPM modules' -> 'Mitsubishi Electric SiC MOSFET Evaluation Kit for EVA11-SDIP DIPIPM Modules'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi Electric MELSEC iQ-F Series PLC CPU for Use with FX5 Expansion Adapter, FX5 Extension Module, Analogue' -> 'Mitsubishi MELSEC iQ-F Series PLC CPU for FX5 Expansion Adapter and FX5 Extension Module - Analog'
+[16:44:05] 🔄 Название обновлено: 'Mitsubishi FX3S Series PLC CPU for Use with FX3 Series, Relay, Transistor Output, 16-Input, DC Input' -> 'Mitsubishi FX3S Series PLC CPU for FX3 Series - 16-Input, DC Input, Relay/Transistor Output'
+[16:44:05] 💾 Обновленный CSV сохранен: mistubishi_prod_reduced_50_percent.csv
+[16:44:05] 
+==================================================
+[16:44:05] 📊 РЕЗУЛЬТАТЫ ГЕНЕРАЦИИ ОПИСАНИЙ
+[16:44:05] ==================================================
+[16:44:05] Всего товаров: 200
+[16:44:05] Сгенерировано описаний: 159
+[16:44:05] Пропущено: 26
+[16:44:05] Ошибки: 30
+[16:44:05] Обработано пакетов: 34
+[16:44:05] Успешность: 79.5%
+

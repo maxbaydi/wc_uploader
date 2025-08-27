@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/home/max-bay/Рабочий стол/Projects/vendorgroup-catalog/4/woocommerce-uploader/venv/bin/python3" "$0" "$@"
+'''exec' "/home/max-bay/Рабочий стол/Projects/vendorgroup-catalog/4/woocommerce-uploader/venv/bin/python" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re

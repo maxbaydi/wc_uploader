@@ -5,6 +5,59 @@
 Адаптер для различных форматов CSV файлов
 """
 
+def parse_characteristics(characteristics_str):
+    """
+    Converts characteristics string to HTML table
+    
+    Args:
+        characteristics_str (str): Characteristics string (format: key: value | key: value)
+        
+    Returns:
+        str: HTML table with characteristics
+    """
+    if not characteristics_str:
+        return ""
+        
+    lines = characteristics_str.split('|')
+    
+    if not lines:
+        return ""
+        
+    html = '<table class="product-specs" style="width:100%; border-collapse:collapse; margin-bottom:20px;">\n'
+    html += '<tbody>\n'
+    
+    section_title = None
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+            
+        # Process section headers (format: ---Section Name---)
+        if line.startswith('---') and line.endswith('---'):
+            section_title = line.replace('---', '').strip()
+            html += f'<tr><th colspan="2" style="background-color:#f5f5f5; padding:10px; text-align:left; font-weight:bold;">{section_title}</th></tr>\n'
+            continue
+            
+        # Process key:value pairs
+        if ':' in line:
+            parts = line.split(':', 1)
+            if len(parts) == 2:
+                key, value = parts
+                key = key.strip()
+                value = value.strip()
+                
+                if key and value:
+                    html += f'<tr>\n'
+                    html += f'  <td style="border:1px solid #ddd; padding:8px; font-weight:bold; width:40%;">{key}</td>\n'
+                    html += f'  <td style="border:1px solid #ddd; padding:8px;">{value}</td>\n'
+                    html += f'</tr>\n'
+    
+    html += '</tbody>\n'
+    html += '</table>\n'
+    
+    return html
+
 class CSVAdapter:
     """
     Адаптер для приведения различных форматов CSV к единому виду
@@ -18,8 +71,9 @@ class CSVAdapter:
             'sku': ['Артикул', 'SKU', 'Код', 'Code', 'Article', 'sku'],
             'category': ['Категория', 'Category', 'Группа', 'Group', 'Type', 'category'],
             'description': ['Описание', 'Description', 'Desc', 'Short Description', 'description'],
-            'characteristics': ['Характеристики', 'Characteristics', 'Specs', 'Technical Data', 'Properties', 'characteristics'],
-            'price': ['Цена', 'Price', 'Cost', 'Amount', 'РРЦ', 'price']
+            'characteristics': ['Характеристики', 'Characteristics', 'Specs', 'Technical Data', 'Properties', 'characteristics', 'Technical Specs'],
+            'price': ['Цена', 'Price', 'Cost', 'Amount', 'РРЦ', 'price'],
+            'stock': ['Остаток', 'Stock', 'Количество', 'Quantity', 'Qty', 'stock']
         }
     
     def detect_columns(self, df):
@@ -68,14 +122,15 @@ class CSVAdapter:
         """
         adapted_row = {}
         
-        # Стандартные поля
-        adapted_row['Бренд'] = str(row.get(mapping.get('brand', ''), '')).strip()
-        adapted_row['Название'] = str(row.get(mapping.get('name', ''), '')).strip()
-        adapted_row['Артикул'] = str(row.get(mapping.get('sku', ''), '')).strip()
-        adapted_row['Категория'] = str(row.get(mapping.get('category', ''), '')).strip()
-        adapted_row['Описание'] = str(row.get(mapping.get('description', ''), '')).strip()
-        adapted_row['Характеристики'] = str(row.get(mapping.get('characteristics', ''), '')).strip()
-        adapted_row['Цена'] = str(row.get(mapping.get('price', '0'), '0')).strip()
+        # Стандартные поля с английскими названиями
+        adapted_row['Brand'] = str(row.get(mapping.get('brand', ''), '')).strip()
+        adapted_row['Name'] = str(row.get(mapping.get('name', ''), '')).strip()
+        adapted_row['SKU'] = str(row.get(mapping.get('sku', ''), '')).strip()
+        adapted_row['Category'] = str(row.get(mapping.get('category', ''), '')).strip()
+        adapted_row['Description'] = str(row.get(mapping.get('description', ''), '')).strip()
+        adapted_row['Technical Specs'] = str(row.get(mapping.get('characteristics', ''), '')).strip()
+        adapted_row['Price'] = str(row.get(mapping.get('price', '0'), '0')).strip()
+        adapted_row['Stock'] = str(row.get(mapping.get('stock', '100'), '100')).strip()
         
         # Убираем 'nan' значения
         for key, value in adapted_row.items():
