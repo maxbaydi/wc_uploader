@@ -94,22 +94,8 @@ pip install -r requirements.txt
 
 ## 🚀 Запуск
 
-### GUI версия (рекомендуется)
-
 ```bash
 python3 gui_fifu.py
-```
-
-### Альтернативный запуск
-
-```bash
-python3 run_fifu.py
-```
-
-### Bash скрипт
-
-```bash
-./run_fifu_uploader.sh
 ```
 
 ## 📊 Поддерживаемые форматы CSV
@@ -178,8 +164,6 @@ woocommerce-uploader/
 ├── config.py                     # Конфигурация
 ├── gui_settings.json             # Настройки GUI
 ├── requirements.txt              # Зависимости
-├── run_fifu.py                   # Скрипт запуска
-└── run_fifu_uploader.sh         # Bash скрипт
 ```
 
 ## 🎯 Основные функции
