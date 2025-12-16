@@ -3,22 +3,79 @@
 Модуль для конвертации изображений в унифицированный формат.
 
 Этот модуль предоставляет функциональность для обработки изображений в папке,
-размещения их в центре шаблона с альбомным расположением (2560x1440) 
+размещения их в центре шаблона с альбомным расположением (2560x1440)
 с учетом качества и разрешения исходных изображений.
+
+КЛЮЧЕВЫЕ ОСОБЕННОСТИ:
+- Улучшенная логика масштабирования: contain + scale-down вместо cover
+- Variance of Laplacian для оценки четкости (если доступен OpenCV)
+- Ограничение апскейла по качеству изображения
+- Единичный ресайз вместо двойного для лучшего качества
+- Поддержка callback логирования для интеграции с GUI
+
+АЛГОРИТМ МАСШТАБИРОВАНИЯ:
+1. Анализ размера и четкости изображения
+2. Вычисление масштаба "вписать целиком" (contain)
+3. Ограничение апскейла в зависимости от качества
+4. Центрирование на белом фоне с сохранением пропорций
+5. Опциональное повышение резкости при низком качестве
+
+ПОДДЕРЖИВАЕМЫЕ ФОРМАТЫ: JPG, JPEG, PNG, WebP, BMP, TIFF
 
 Автор: GitHub Copilot
 Дата: 16 июля 2025
+Обновлено: Добавлена улучшенная логика масштабирования
 """
 
-import os
 import sys
-from pathlib import Path
-from typing import Tuple, Optional, List
 import logging
+from pathlib import Path
+from typing import Tuple, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from PIL import Image, ImageFilter, ImageEnhance
-import numpy as np
 from datetime import datetime
+import time
+import json
+
+import numpy as np
+from PIL import Image, ImageFilter
+
+# Проверяем доступность OpenCV для Variance of Laplacian
+try:
+    import cv2
+    _HAS_CV2 = True
+except ImportError:
+    _HAS_CV2 = False
+
+
+TEMPLATE_SIZE = (2560, 1440)
+BACKGROUND_COLOR = (255, 255, 255)
+SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff'}
+LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
+LOG_FILE = 'image_converter.log'
+DEBUG_LOG_PATH = Path(__file__).parent / ".cursor" / "debug.log"
+
+UPSCALE_HARD_CAP = 1.5
+
+SHARP_THRESHOLD_CV2 = 500.0
+SHARP_THRESHOLD_NO_CV2 = 3000.0
+UNSHARP_THRESHOLD_CV2 = 200.0
+UNSHARP_THRESHOLD_NO_CV2 = 2000.0
+UNSHARP_MASK_PARAMS = {"radius": 2, "percent": 150, "threshold": 3}
+
+
+def _select_threshold(cv2_value: float, fallback_value: float) -> float:
+    return cv2_value if _HAS_CV2 else fallback_value
+
+
+#region agent log helper
+def _agent_log(payload: dict) -> None:
+    try:
+        DEBUG_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with DEBUG_LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+#endregion
 
 
 class ImageQualityAnalyzer:
@@ -27,25 +84,26 @@ class ImageQualityAnalyzer:
     @staticmethod
     def analyze_sharpness(image: Image.Image) -> float:
         """
-        Анализирует четкость изображения с использованием градиентного фильтра.
-        
+        Оценивает четкость изображения. Предпочтительно: Variance of Laplacian (VoL),
+        fallback: дисперсия после FIND_EDGES.
+
         Args:
             image: PIL изображение для анализа
-            
+
         Returns:
             float: Показатель четкости (больше = четче)
         """
-        # Конвертируем в градации серого для анализа
-        gray_image = image.convert('L')
-        
-        # Применяем фильтр для вычисления градиента
-        gradient = gray_image.filter(ImageFilter.FIND_EDGES)
-        
-        # Вычисляем дисперсию как показатель четкости
-        np_array = np.array(gradient)
-        sharpness = np_array.var()
-        
-        return sharpness
+        gray = image.convert('L')
+        np_gray = np.array(gray)
+
+        if _HAS_CV2:
+            # VoL — устойчивый и широко используемый фокус-метод
+            # cv2.Laplacian(...).var() — численная метрика резкости
+            return cv2.Laplacian(np_gray, cv2.CV_64F).var()
+        else:
+            # Fallback на текущую реализацию, если OpenCV недоступен
+            gradient = gray.filter(ImageFilter.FIND_EDGES)
+            return np.array(gradient).var()
     
     @staticmethod
     def analyze_resolution_quality(width: int, height: int) -> str:
@@ -70,110 +128,98 @@ class ImageQualityAnalyzer:
             return 'medium'
         else:
             return 'large'
-    
+
+
     @staticmethod
-    def get_scale_factor(image: Image.Image) -> float:
+    def get_allowed_upscale(image: Image.Image) -> float:
         """
-        Определяет коэффициент масштабирования для изображения.
-        
-        Args:
-            image: PIL изображение
-            
-        Returns:
-            float: Коэффициент масштабирования (1.0, 1.2, 1.5, 2.0)
+        Determines the maximum allowed upscale factor.
+        This logic is conservative: it avoids upscaling small or blurry images.
         """
-        width, height = image.size
-        total_pixels = width * height
-        
-        # Анализируем качество разрешения
-        resolution_quality = ImageQualityAnalyzer.analyze_resolution_quality(width, height)
-        
-        # Анализируем четкость
+        w, h = image.size
+        res_quality = ImageQualityAnalyzer.analyze_resolution_quality(w, h)
         sharpness = ImageQualityAnalyzer.analyze_sharpness(image)
+
+        sharp_threshold = _select_threshold(SHARP_THRESHOLD_CV2, SHARP_THRESHOLD_NO_CV2)
         
-        # Пороговые значения для четкости
-        very_low_sharpness = 1000   # Очень низкое качество четкости
-        low_sharpness = 1500        # Низкое качество четкости
-        medium_sharpness = 2000     # Среднее качество четкости
-        high_sharpness = 2500       # Высокое качество четкости
+        # RULE 1: For very small images, NEVER upscale. The risk of blur is too high.
+        if res_quality == 'very_small':
+            return 1.0
+
+        # RULE 2: For other images, only allow upscaling if they are reasonably sharp.
+        if sharpness < sharp_threshold:
+            return 1.0
         
-        # Улучшенная логика масштабирования
-        if resolution_quality == 'very_small':
-            # Очень маленькие изображения (как adp0150bnc.jpg: 500x298)
-            # Такие изображения лучше не увеличивать сильно
-            if sharpness >= high_sharpness:
-                return 1.5  # Только если очень четкое
-            elif sharpness >= medium_sharpness:
-                return 1.2  # Небольшое увеличение
+        # RULE 3: For small and medium images, require significantly higher sharpness
+        high_sharpness_threshold = sharp_threshold * 2.0
+        
+        if res_quality == 'small':
+            return 1.0  # Запрет апскейла для small
+        elif res_quality == 'medium':
+            if sharpness >= high_sharpness_threshold:
+                return 1.1
             else:
-                return 1.0  # Не увеличиваем совсем
-                
-        elif resolution_quality == 'small':
-            # Маленькие изображения
-            if sharpness >= high_sharpness:
-                return 2.0  # Можно увеличить в 2 раза
-            elif sharpness >= medium_sharpness:
-                return 1.5  # Увеличиваем в 1.5 раза
-            elif sharpness >= low_sharpness:
-                return 1.2  # Небольшое увеличение
-            else:
-                return 1.0  # Не увеличиваем
-                
-        elif resolution_quality == 'medium':
-            # Средние изображения
-            if sharpness >= high_sharpness:
-                return 1.5  # Увеличиваем в 1.5 раза
-            elif sharpness >= medium_sharpness:
-                return 1.2  # Небольшое увеличение
-            else:
-                return 1.0  # Не увеличиваем
-                
-        else:  # large
-            # Большие изображения не увеличиваем
+                return 1.0
+        else:
             return 1.0
 
 
 class ImageConverter:
     """Основной класс для конвертации изображений."""
     
-    def __init__(self, source_dir: str, output_dir: str = "img_result"):
+    def __init__(self, source_dir: str, output_dir: str = "img_result", log_callback=None):
         """
         Инициализация конвертера изображений.
-        
+
         Args:
             source_dir: Путь к папке с исходными изображениями
             output_dir: Путь к папке для сохранения результатов
+            log_callback: Функция обратного вызова для логирования (опционально)
         """
         self.source_dir = Path(source_dir)
         self.output_dir = Path(output_dir)
-        self.template_width = 2560
-        self.template_height = 1440
-        self.background_color = (255, 255, 255)  # Белый фон
-        
-        # Поддерживаемые форматы
-        self.supported_formats = {'.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff'}
-        
+        self.template_width, self.template_height = TEMPLATE_SIZE
+        self.background_color = BACKGROUND_COLOR
+        self.log_callback = log_callback  # Callback функция для внешнего логирования
+        self.supported_formats = SUPPORTED_FORMATS
+        self.unsharp_threshold = _select_threshold(UNSHARP_THRESHOLD_CV2, UNSHARP_THRESHOLD_NO_CV2)
+
         # Настройка логирования
         self._setup_logging()
-        
+
         # Создаем папку для результатов
         self.output_dir.mkdir(exist_ok=True)
-        
+
         # Инициализируем анализатор качества
         self.quality_analyzer = ImageQualityAnalyzer()
     
     def _setup_logging(self) -> None:
         """Настройка системы логирования."""
-        log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        logging.basicConfig(
-            level=logging.INFO,
-            format=log_format,
-            handlers=[
-                logging.FileHandler('image_converter.log'),
-                logging.StreamHandler(sys.stdout)
-            ]
-        )
+        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, handlers=[
+            logging.FileHandler(LOG_FILE),
+            logging.StreamHandler(sys.stdout)
+        ])
         self.logger = logging.getLogger(__name__)
+
+    def _log(self, message: str, level: str = 'info') -> None:
+        """
+        Универсальный метод логирования с поддержкой callback.
+
+        Args:
+            message: Сообщение для логирования
+            level: Уровень логирования ('info', 'error', 'warning')
+        """
+        if self.log_callback:
+            # Используем callback для внешнего логирования
+            self.log_callback(message)
+        else:
+            # Используем стандартный логгер
+            if level == 'info':
+                self.logger.info(message)
+            elif level == 'error':
+                self.logger.error(message)
+            elif level == 'warning':
+                self.logger.warning(message)
     
     def _get_image_files(self) -> List[Path]:
         """
@@ -185,139 +231,167 @@ class ImageConverter:
         image_files = []
         
         if not self.source_dir.exists():
-            self.logger.error(f"Папка {self.source_dir} не существует")
+            self._log(f"Папка {self.source_dir} не существует", 'error')
             return image_files
-        
+
         for file_path in self.source_dir.iterdir():
             if file_path.is_file() and file_path.suffix.lower() in self.supported_formats:
                 image_files.append(file_path)
-        
-        self.logger.info(f"Найдено {len(image_files)} изображений для обработки")
+
+        self._log(f"Найдено {len(image_files)} изображений для обработки")
         return image_files
     
+
     def _calculate_scale_and_position(self, image: Image.Image) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         """
-        Вычисляет масштаб и позицию для размещения изображения в шаблоне.
-        
-        Args:
-            image: PIL изображение
-            
-        Returns:
-            Tuple: ((new_width, new_height), (x_position, y_position))
+        Calculates the final size and position of the image on the template.
+        It respects the quality limits and includes a hard cap on upscaling.
         """
         orig_width, orig_height = image.size
-        
-        # Получаем коэффициент предварительного масштабирования
-        scale_factor = self.quality_analyzer.get_scale_factor(image)
-        
-        # Применяем предварительное масштабирование
-        pre_scaled_width = int(orig_width * scale_factor)
-        pre_scaled_height = int(orig_height * scale_factor)
-        
-        # Вычисляем соотношения сторон
-        image_aspect = pre_scaled_width / pre_scaled_height
-        template_aspect = self.template_width / self.template_height
-        
-        # Определяем итоговый масштаб для вписывания в шаблон
-        if image_aspect > template_aspect:
-            # Изображение шире шаблона - масштабируем по ширине
-            final_scale = self.template_width / pre_scaled_width
+        contain_scale = min(self.template_width / orig_width, self.template_height / orig_height)
+        quality_limited_upscale = self.quality_analyzer.get_allowed_upscale(image)
+
+        #region agent log
+        _agent_log({
+            "sessionId": "debug-session",
+            "runId": "run1",
+            "hypothesisId": "H1",
+            "location": "image_converter.py:_calculate_scale_and_position",
+            "message": "scale inputs",
+            "data": {
+                "orig_size": [orig_width, orig_height],
+                "contain_scale": contain_scale,
+                "quality_limited_upscale": quality_limited_upscale
+            },
+            "timestamp": int(time.time() * 1000)
+        })
+        #endregion
+
+        if contain_scale > UPSCALE_HARD_CAP:
+            final_scale = 1.0
+        elif contain_scale > 1.0:
+            final_scale = min(contain_scale, quality_limited_upscale, UPSCALE_HARD_CAP)
         else:
-            # Изображение выше шаблона - масштабируем по высоте
-            final_scale = self.template_height / pre_scaled_height
-        
-        # Вычисляем финальные размеры
-        new_width = int(pre_scaled_width * final_scale)
-        new_height = int(pre_scaled_height * final_scale)
-        
-        # Центрируем изображение
+            final_scale = contain_scale
+
+        new_width = max(1, int(round(orig_width * final_scale)))
+        new_height = max(1, int(round(orig_height * final_scale)))
+
         x_position = (self.template_width - new_width) // 2
         y_position = (self.template_height - new_height) // 2
-        
+
+        #region agent log
+        _agent_log({
+            "sessionId": "debug-session",
+            "runId": "run1",
+            "hypothesisId": "H2",
+            "location": "image_converter.py:_calculate_scale_and_position",
+            "message": "scale output",
+            "data": {
+                "final_scale": final_scale,
+                "new_size": [new_width, new_height],
+                "position": [x_position, y_position]
+            },
+            "timestamp": int(time.time() * 1000)
+        })
+        #endregion
+
         return (new_width, new_height), (x_position, y_position)
     
-    def _enhance_image_quality(self, image: Image.Image) -> Image.Image:
-        """
-        Улучшает качество изображения при необходимости.
-        
-        Args:
-            image: Исходное изображение
-            
-        Returns:
-            Image.Image: Улучшенное изображение
-        """
-        # Анализируем четкость
+    def _build_template(self) -> Image.Image:
+        return Image.new('RGB', (self.template_width, self.template_height), self.background_color)
+
+    @staticmethod
+    def _ensure_rgb(image: Image.Image) -> Image.Image:
+        return image if image.mode == 'RGB' else image.convert('RGB')
+
+    @staticmethod
+    def _resize_image(image: Image.Image, size: Tuple[int, int]) -> Image.Image:
+        return image if image.size == size else image.resize(size, Image.LANCZOS)
+
+    def _should_apply_unsharp_mask(self, sharpness: float) -> bool:
+        return sharpness < self.unsharp_threshold
+
+    def _collect_image_stats(self, image: Image.Image) -> Tuple[str, float, Tuple[int, int]]:
+        width, height = image.size
+        resolution_quality = self.quality_analyzer.analyze_resolution_quality(width, height)
         sharpness = self.quality_analyzer.analyze_sharpness(image)
-        
-        # Если изображение недостаточно четкое, применяем фильтр повышения резкости
-        if sharpness < 1000:  # Пороговое значение
-            enhancer = ImageEnhance.Sharpness(image)
-            image = enhancer.enhance(1.2)  # Небольшое повышение резкости
-        
-        return image
+        return resolution_quality, sharpness, (width, height)
+
+    @staticmethod
+    def _apply_unsharp_mask(image: Image.Image) -> Image.Image:
+        return image.filter(ImageFilter.UnsharpMask(**UNSHARP_MASK_PARAMS))
     
     def _process_single_image(self, image_path: Path) -> bool:
         """
         Обрабатывает одно изображение.
-        
+
         Args:
             image_path: Путь к изображению
-            
+
         Returns:
             bool: True, если обработка прошла успешно
         """
         try:
-            # Открываем изображение
             with Image.open(image_path) as image:
-                # Конвертируем в RGB, если необходимо
-                if image.mode != 'RGB':
-                    image = image.convert('RGB')
-                
-                # Анализируем качество для логирования
-                orig_width, orig_height = image.size
-                resolution_quality = self.quality_analyzer.analyze_resolution_quality(orig_width, orig_height)
-                sharpness = self.quality_analyzer.analyze_sharpness(image)
-                scale_factor = self.quality_analyzer.get_scale_factor(image)
-                
-                # Улучшаем качество при необходимости
-                image = self._enhance_image_quality(image)
-                
-                # Вычисляем размеры и позицию с новой логикой
+                image = self._ensure_rgb(image)
+                resolution_quality, sharpness, (orig_width, orig_height) = self._collect_image_stats(image)
                 (new_width, new_height), (x_pos, y_pos) = self._calculate_scale_and_position(image)
-                
-                # Создаем шаблон с белым фоном
-                template = Image.new('RGB', (self.template_width, self.template_height), 
-                                   self.background_color)
-                
-                # Применяем предварительное масштабирование
-                pre_scaled_width = int(orig_width * scale_factor)
-                pre_scaled_height = int(orig_height * scale_factor)
-                
-                # Сначала применяем предварительное масштабирование
-                if scale_factor != 1.0:
-                    image = image.resize((pre_scaled_width, pre_scaled_height), Image.LANCZOS)
-                
-                # Затем масштабируем до финальных размеров
-                if (new_width, new_height) != image.size:
-                    resized_image = image.resize((new_width, new_height), Image.LANCZOS)
-                else:
-                    resized_image = image
-                
-                # Вставляем изображение в шаблон
+                final_scale_est = new_height / orig_height if orig_height else 0
+
+                #region agent log
+                _agent_log({
+                    "sessionId": "debug-session",
+                    "runId": "run1",
+                    "hypothesisId": "H3",
+                    "location": "image_converter.py:_process_single_image",
+                    "message": "image stats and targets",
+                    "data": {
+                        "file": image_path.name,
+                        "resolution_quality": resolution_quality,
+                        "sharpness": sharpness,
+                        "orig_size": [orig_width, orig_height],
+                        "target_size": [new_width, new_height],
+                        "final_scale_est": final_scale_est
+                    },
+                    "timestamp": int(time.time() * 1000)
+                })
+                #endregion
+
+                template = self._build_template()
+                resized_image = self._resize_image(image, (new_width, new_height))
+
+                if self._should_apply_unsharp_mask(sharpness):
+                    resized_image = self._apply_unsharp_mask(resized_image)
+                    #region agent log
+                    _agent_log({
+                        "sessionId": "debug-session",
+                        "runId": "run1",
+                        "hypothesisId": "H4",
+                        "location": "image_converter.py:_process_single_image",
+                        "message": "applied unsharp mask",
+                        "data": {
+                            "file": image_path.name,
+                            "sharpness": sharpness,
+                            "threshold": self.unsharp_threshold
+                        },
+                        "timestamp": int(time.time() * 1000)
+                    })
+                    #endregion
+
                 template.paste(resized_image, (x_pos, y_pos))
-                
-                # Сохраняем результат с оригинальным именем
-                output_path = self.output_dir / f"{image_path.name}"
+
+                output_path = self.output_dir / image_path.name
                 template.save(output_path, 'JPEG', quality=100, optimize=True)
-                
-                # Логируем с подробной информацией
-                self.logger.info(f"✓ Обработано: {image_path.name} -> {output_path.name} "
-                               f"(размер: {resolution_quality}, четкость: {sharpness:.0f}, "
-                               f"масштаб: {scale_factor}x, {orig_width}x{orig_height} -> {new_width}x{new_height})")
+
+                self._log(
+                    f"✓ Обработано: {image_path.name} -> {output_path.name} "
+                    f"(размер: {resolution_quality}, четкость: {sharpness:.1f}, "
+                    f"{orig_width}x{orig_height} -> {new_width}x{new_height})"
+                )
                 return True
-                
         except Exception as e:
-            self.logger.error(f"✗ Ошибка при обработке {image_path.name}: {str(e)}")
+            self._log(f"✗ Ошибка при обработке {image_path.name}: {str(e)}", 'error')
             return False
     
     def convert_images(self, max_workers: int = 4) -> None:
@@ -328,15 +402,15 @@ class ImageConverter:
             max_workers: Максимальное количество потоков для параллельной обработки
         """
         start_time = datetime.now()
-        self.logger.info("=" * 60)
-        self.logger.info("НАЧАЛО ОБРАБОТКИ ИЗОБРАЖЕНИЙ")
-        self.logger.info("=" * 60)
-        
+        self._log("=" * 60)
+        self._log("НАЧАЛО ОБРАБОТКИ ИЗОБРАЖЕНИЙ")
+        self._log("=" * 60)
+
         # Получаем список файлов
         image_files = self._get_image_files()
-        
+
         if not image_files:
-            self.logger.warning("Не найдено изображений для обработки")
+            self._log("Не найдено изображений для обработки", 'warning')
             return
         
         # Статистика обработки
@@ -361,24 +435,24 @@ class ImageConverter:
                     else:
                         failed_count += 1
                 except Exception as e:
-                    self.logger.error(f"Неожиданная ошибка для {image_path.name}: {str(e)}")
+                    self._log(f"Неожиданная ошибка для {image_path.name}: {str(e)}", 'error')
                     failed_count += 1
-        
+
         # Итоговая статистика
         end_time = datetime.now()
         processing_time = end_time - start_time
-        
-        self.logger.info("=" * 60)
-        self.logger.info("РЕЗУЛЬТАТЫ ОБРАБОТКИ")
-        self.logger.info("=" * 60)
-        self.logger.info(f"Всего изображений: {len(image_files)}")
-        self.logger.info(f"Успешно обработано: {successful_count}")
-        self.logger.info(f"Ошибки: {failed_count}")
-        self.logger.info(f"Время обработки: {processing_time}")
-        self.logger.info(f"Результаты сохранены в: {self.output_dir}")
-        
+
+        self._log("=" * 60)
+        self._log("РЕЗУЛЬТАТЫ ОБРАБОТКИ")
+        self._log("=" * 60)
+        self._log(f"Всего изображений: {len(image_files)}")
+        self._log(f"Успешно обработано: {successful_count}")
+        self._log(f"Ошибки: {failed_count}")
+        self._log(f"Время обработки: {processing_time}")
+        self._log(f"Результаты сохранены в: {self.output_dir}")
+
         if failed_count > 0:
-            self.logger.warning(f"Внимание: {failed_count} изображений не удалось обработать")
+            self._log(f"Внимание: {failed_count} изображений не удалось обработать", 'warning')
 
 
 def main():

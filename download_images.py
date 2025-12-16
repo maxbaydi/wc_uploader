@@ -13,17 +13,17 @@ def normalize_filename(s):
     """
     if not s:
         return "unnamed"
-        
+
     # Убираем пробелы в начале и конце
     s = s.strip()
-    
+
     # Оставляем только буквы и цифры, удаляем все остальные символы
     normalized = re.sub(r'[^A-Za-z0-9А-Яа-яЁё]', '', s)
-    
+
     # Если после очистки ничего не осталось, используем fallback
     if not normalized:
         normalized = "unnamed"
-    
+
     # Приводим к нижнему регистру
     return normalized.lower()
 

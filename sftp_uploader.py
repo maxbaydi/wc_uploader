@@ -16,6 +16,30 @@ import requests
 import unicodedata
 import re
 
+def sftp_path_join(*parts):
+    """
+    Создает путь для SFTP с прямыми слешами, независимо от операционной системы
+    
+    Args:
+        *parts: Части пути
+        
+    Returns:
+        str: Путь с прямыми слешами
+    """
+    # Фильтруем пустые части и нормализуем слеши
+    filtered_parts = [part.strip('/') for part in parts if part and part.strip('/')]
+    
+    if not filtered_parts:
+        return '/'
+    
+    # Собираем путь с прямыми слешами
+    result = '/' + '/'.join(filtered_parts)
+    
+    # Убираем двойные слеши
+    result = re.sub(r'/+', '/', result)
+    
+    return result
+
 class SFTPImageUploader:
     def __init__(self, host, port, username, password, remote_base_path='/var/www/mytua.com/images', web_domain=None):
         """
@@ -211,11 +235,16 @@ class SFTPImageUploader:
             path_parts = remote_path.strip('/').split('/')
             current_path = '/'
             
+            self.log(f"🔍 Создание директории поэтапно:")
+            self.log(f"   - Исходный путь: {remote_path}")
+            self.log(f"   - Части пути: {path_parts}")
+            
             for part in path_parts:
                 if not part:  # Пропускаем пустые части
                     continue
                     
-                current_path = os.path.join(current_path, part)
+                current_path = sftp_path_join(current_path, part)
+                self.log(f"   - Текущий путь: {current_path}")
                 
                 try:
                     # Проверяем существование директории
@@ -292,12 +321,12 @@ class SFTPImageUploader:
         if match:
             web_root_path = match.group(1)
             if web_root_path:
-                web_path = f"/{web_root_path}/{remote_directory}/{filename}"
+                web_path = sftp_path_join('/', web_root_path, remote_directory, filename)
             else:
-                web_path = f"/{remote_directory}/{filename}"
+                web_path = sftp_path_join('/', remote_directory, filename)
         else:
             # Фолбек - используем стандартную структуру
-            web_path = f"/images/{remote_directory}/{filename}"
+            web_path = sftp_path_join('/', 'images', remote_directory, filename)
         
         return web_path
             
@@ -384,8 +413,12 @@ class SFTPImageUploader:
             original_filename = os.path.basename(local_file_path)
                 
             # Формируем полный путь к удаленной директории
-            remote_dir_full = os.path.join(self.remote_base_path, remote_directory)
+            remote_dir_full = sftp_path_join(self.remote_base_path, remote_directory)
             self.log(f"📁 Полный путь к директории на сервере: {remote_dir_full}")
+            self.log(f"🔍 Отладочная информация:")
+            self.log(f"   - remote_base_path: {self.remote_base_path}")
+            self.log(f"   - remote_directory: {remote_directory}")
+            self.log(f"   - Результат sftp_path_join: {remote_dir_full}")
             
             # Проверяем/создаем удаленную директорию
             if not self.ensure_remote_directory(remote_dir_full):
@@ -405,12 +438,17 @@ class SFTPImageUploader:
                 remote_filename = clean_name + ext
             
             # Полный путь на удаленном сервере
-            remote_path = os.path.join(remote_dir_full, remote_filename)
+            remote_path = sftp_path_join(remote_dir_full, remote_filename)
             self.log(f"📍 Полный путь к файлу на сервере: {remote_path}")
+            self.log(f"🔍 Отладочная информация для файла:")
+            self.log(f"   - remote_dir_full: {remote_dir_full}")
+            self.log(f"   - remote_filename: {remote_filename}")
+            self.log(f"   - Результат sftp_path_join: {remote_path}")
             
             # Проверяем существование файла на сервере
             file_exists = self.file_exists_on_server(remote_path)
             self.log(f"🔍 Файл существует на сервере: {file_exists}")
+            self.log(f"🔍 Проверяем путь: {remote_path}")
             
             # Определяем, нужно ли перезаписывать файл
             should_overwrite = False
@@ -539,7 +577,7 @@ class SFTPImageUploader:
                 
                 if rel_path != '.':
                     # Если не в корневой директории, добавляем подпуть
-                    rel_remote_dir = os.path.join(remote_directory, rel_path)
+                    rel_remote_dir = sftp_path_join(remote_directory, rel_path)
                     
                 files_to_upload.append((local_file_path, rel_remote_dir, filename))
                 total_files += 1

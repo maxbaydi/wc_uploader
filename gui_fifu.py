@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-WooCommerce FIFU Uploader - GUI
-Графический интерфейс для загрузчика товаров с поддержкой плагина FIFU и загрузкой изображений на SFTP
+WooCommerce ExtraURL Uploader - GUI
+Графический интерфейс для загрузчика товаров с поддержкой плагина ExtraURL и загрузкой изображений на SFTP
 """
 
 import tkinter as tk
@@ -19,6 +19,18 @@ import pandas as pd
 from csv_adapter import CSVAdapter
 from image_downloader import ImageDownloader
 from ai_description_generator import AIDescriptionGenerator
+
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
+DEFAULT_DIALOG_DIR = os.path.expanduser("~")
+CSV_FILETYPES = [("CSV файлы", "*.csv"), ("Все файлы", "*.*")]
+IMAGE_FILETYPES = [
+    ("Изображения", "*.jpg *.jpeg *.png *.gif *.webp"),
+    ("JPEG", "*.jpg *.jpeg"),
+    ("PNG", "*.png"),
+    ("GIF", "*.gif"),
+    ("WebP", "*.webp"),
+    ("Все файлы", "*.*")
+]
 
 
 class ScrollableFrame(ttk.Frame):
@@ -48,11 +60,9 @@ class ScrollableFrame(ttk.Frame):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
         
-        # Привязываем события для прокрутки колесом мыши
-        self.bind_all("<MouseWheel>", self._on_mousewheel)
-        self.bind_all("<Button-4>", self._on_mousewheel)
-        self.bind_all("<Button-5>", self._on_mousewheel)
-        
+        # Включаем глобальные бинды колесика с проверкой принадлежности виджетов
+        self._bind_mousewheel()
+
         # Обновляем размер canvas при изменении размера фрейма
         self.bind("<Configure>", self._on_frame_configure)
         
@@ -61,13 +71,59 @@ class ScrollableFrame(ttk.Frame):
         canvas_width = event.width - self.scrollbar.winfo_reqwidth()
         self.canvas.configure(width=canvas_width)
         self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
+        # Подгоняем высоту содержимого под доступную область, чтобы оно могло растягиваться
+        self.canvas.itemconfig(self.canvas_frame, height=event.height)
         
+    def _bind_mousewheel(self, _event=None):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
+        self.canvas.bind_all("<Button-4>", self._on_mousewheel, add="+")
+        self.canvas.bind_all("<Button-5>", self._on_mousewheel, add="+")
+
+    def _is_descendant(self, widget):
+        while widget:
+            if widget is self:
+                return True
+            widget = widget.master
+        return False
+
     def _on_mousewheel(self, event):
         """Обработка прокрутки колесом мыши"""
-        if event.num == 4 or event.delta > 0:
-            self.canvas.yview_scroll(-1, "units")
-        elif event.num == 5 or event.delta < 0:
-            self.canvas.yview_scroll(1, "units")
+        delta = 0
+        if event.delta:
+            delta = int(-event.delta / 120) if abs(event.delta) >= 120 else (-1 if event.delta > 0 else 1)
+        elif event.num in (4, 5):
+            delta = -1 if event.num == 4 else 1
+
+        if not delta:
+            return
+
+        target = self.winfo_containing(event.x_root, event.y_root)
+
+        # Если колесо над вложенным текстовым виджетом — прокручиваем его, а не весь canvas
+        if target and self._is_descendant(target):
+            if hasattr(target, "yview_scroll"):
+                target.yview_scroll(delta, "units")
+                return "break"
+
+            # Если событие на дочернем виджете, но без собственной прокрутки — прокручиваем canvas
+            if self._has_vertical_overflow():
+                self.canvas.yview_scroll(delta, "units")
+                return "break"
+
+        # Если колесо крутится вне дочерних или в пустой зоне — скроллим только при переполнении
+        if self._has_vertical_overflow():
+            self.canvas.yview_scroll(delta, "units")
+            return "break"
+
+    def _has_vertical_overflow(self) -> bool:
+        """Проверяет, превышает ли содержимое видимую область canvas по высоте."""
+        bbox = self.canvas.bbox("all")
+        if not bbox:
+            return False
+        _, y1, _, y2 = bbox
+        content_height = y2 - y1
+        view_height = self.canvas.winfo_height()
+        return content_height > view_height + 2  # небольшой запас
 
 
 class UploaderGUI:
@@ -75,7 +131,7 @@ class UploaderGUI:
         self.root = tk.Tk()
         self.root.title("WooCommerce Uploader")
         self.root.geometry("900x500")
-        self.root.minsize(800, 500)
+        self.root.minsize(800, 600)
         self.root.maxsize(1200, 1100)  # Максимальный размер окна
         
         # Переменные для файлов и папок
@@ -130,6 +186,16 @@ class UploaderGUI:
         self.image_downloader = None
         self.is_downloading = False
         self._download_stop_flag = False
+
+        # Переменные для обработки изображений
+        self.process_source_folder = tk.StringVar(value="")
+        self.process_output_folder = tk.StringVar(value="img_result")
+        self.process_max_workers = tk.IntVar(value=4)
+
+        # Обработчик изображений
+        self.image_processor = None
+        self.is_processing_images = False
+        self._process_stop_flag = False
         
         # Переменные для AI генерации описаний
         self.ai_csv_file_path = tk.StringVar()
@@ -165,6 +231,81 @@ class UploaderGUI:
         
         # Автоматически загружаем настройки при запуске
         self.load_settings_on_startup()
+
+    def _get_initial_dir(self):
+        """Возвращает начальный каталог для диалогов выбора файлов/папок."""
+        return DEFAULT_DIALOG_DIR
+
+    def _load_settings_file(self):
+        """Читает файл настроек GUI или возвращает пустой словарь."""
+        if not os.path.exists(SETTINGS_FILE):
+            return {}
+        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
+    def _save_settings_file(self, settings: dict):
+        """Сохраняет переданные настройки в файл."""
+        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=2, ensure_ascii=False)
+
+    def _update_settings(self, updates: dict):
+        """Обновляет файл настроек переданными значениями."""
+        settings = self._load_settings_file()
+        settings.update(updates)
+        self._save_settings_file(settings)
+
+    def _apply_settings(self, settings: dict, mapping: dict):
+        """Проставляет значения в tkinter-переменные, если ключи присутствуют."""
+        for key, var in mapping.items():
+            if key in settings:
+                var.set(settings[key])
+
+    def _get_ssh_config(self):
+        """Формирует конфиг SFTP из текущих полей формы."""
+        return {
+            'host': self.ssh_host.get(),
+            'port': self.ssh_port.get(),
+            'username': self.ssh_username.get(),
+            'password': self.ssh_password.get(),
+            'remote_base_path': self.ssh_remote_path.get(),
+            'web_domain': self.ssh_web_domain.get()
+        }
+
+    def _get_dummy_ssh_config(self):
+        """Возвращает заглушку SFTP для режима без SFTP."""
+        return {
+            'host': 'localhost',
+            'port': 22,
+            'username': 'dummy',
+            'password': 'dummy',
+            'remote_base_path': '/tmp',
+            'web_domain': 'localhost'
+        }
+
+    def _create_uploader(self):
+        """Создает и настраивает загрузчик WooCommerce с актуальными параметрами."""
+        ssh_config = self._get_ssh_config() if self.use_fifu.get() else self._get_dummy_ssh_config()
+        uploader = WooCommerceFIFUUploader(
+            wc_url=self.wc_url.get(),
+            wc_consumer_key=self.wc_consumer_key.get(),
+            wc_consumer_secret=self.wc_consumer_secret.get(),
+            ssh_config=ssh_config,
+            wp_username=self.wp_username.get(),
+            wp_app_password=self.wp_app_password.get()
+        )
+        uploader.set_progress_callback(self.update_progress)
+        uploader.set_log_callback(self.log_message)
+        return uploader
+
+    def _read_csv_preview(self, filename: str, nrows: int = 5):
+        """Читает небольшую часть CSV с автоматическим выбором кодировки."""
+        try:
+            return pd.read_csv(filename, nrows=nrows, encoding='utf-8', on_bad_lines='skip')
+        except UnicodeDecodeError:
+            return pd.read_csv(filename, nrows=nrows, encoding='cp1251', on_bad_lines='skip')
+        except Exception as e:
+            self.log_message(f"⚠ Не удалось прочитать CSV для предпросмотра: {e}")
+            return None
         
     def setup_ui(self):
         # Заголовок
@@ -203,7 +344,10 @@ class UploaderGUI:
         
         # Вкладка генерации AI описаний
         self.setup_ai_description_tab(notebook)
-        
+
+        # Вкладка обработки изображений
+        self.setup_image_processing_tab(notebook)
+
         # Вкладка процесса
         self.setup_progress_tab(notebook)
         
@@ -587,11 +731,11 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         info_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         info_text = """
-Для работы с внешними изображениями через FIFU требуется:
+Для работы с внешними изображениями через ExtraURL требуется:
 
 1. Настроенный SFTP сервер для загрузки изображений
 2. Доступность изображений по HTTP/HTTPS (веб-сервер на том же хосте)  
-3. Установленный плагин FIFU на сайте WooCommerce
+3. Установленный плагин ExtraURL на сайте WooCommerce
 
 Настройки SFTP загружаются из файла gui_settings.json при запуске.
 Используйте кнопки для сохранения изменений в файл настроек или их перезагрузки.
@@ -812,16 +956,21 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         log_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
         
         tk.Label(log_container, text="Журнал загрузки:", font=("Arial", 11, "bold")).pack(anchor='w')
-        
+
+        log_body = tk.Frame(log_container)
+        log_body.pack(fill=tk.BOTH, expand=True, pady=5)
+        log_body.rowconfigure(0, weight=1)
+        log_body.columnconfigure(0, weight=1)
+
         self.log_text = scrolledtext.ScrolledText(
-            log_container, 
+            log_body, 
             height=15, 
             wrap=tk.WORD,
             bg='#2c3e50',
             fg='#ecf0f1',
             font=("Consolas", 9)
         )
-        self.log_text.pack(fill=tk.BOTH, expand=True, pady=5)
+        self.log_text.grid(row=0, column=0, sticky="nsew")
         
         # Настраиваем теги для цветного лога
         self.log_text.tag_config('SUCCESS', foreground='#27ae60', font=("Consolas", 9, "bold"))
@@ -852,7 +1001,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         ).pack(side=tk.LEFT, anchor='w', padx=5)
 
         # Начальное сообщение
-        self.log_message("=== WooCommerce FIFU Uploader ===")
+        self.log_message("=== WooCommerce ExtraURL Uploader ===")
         
         # Инициализация состояния элементов управления
         self.initialize_gui_state()
@@ -861,21 +1010,16 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def browse_csv_file(self):
         filename = filedialog.askopenfilename(
             title="Выберите CSV файл",
-            initialdir="/home/max-bay/Рабочий стол/Projects/",
-            filetypes=[("CSV файлы", "*.csv"), ("Все файлы", "*.*")]
+            initialdir=self._get_initial_dir(),
+            filetypes=CSV_FILETYPES
         )
         if filename:
             self.csv_file_path.set(filename)
             self.log_message(f"✓ Выбран CSV файл: {os.path.basename(filename)}")
             
             # Автоматически определяем колонки и строим чекбоксы
-            try:
-                # читаем только заголовки первой строки
-                df_preview = pd.read_csv(filename, nrows=1, encoding='utf-8', on_bad_lines='skip')
-            except UnicodeDecodeError:
-                df_preview = pd.read_csv(filename, nrows=1, encoding='cp1251', on_bad_lines='skip')
-            except Exception as e:
-                self.log_message(f"⚠ Не удалось прочитать CSV для предпросмотра: {e}")
+            df_preview = self._read_csv_preview(filename, nrows=1)
+            if df_preview is None:
                 return
 
             # Очищаем предыдущие чекбоксы
@@ -903,7 +1047,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def browse_images_folder(self):
         folder = filedialog.askdirectory(
             title="Выберите папку с изображениями",
-            initialdir="/home/max-bay/Рабочий стол/Projects/"
+            initialdir=self._get_initial_dir()
         )
         if folder:
             self.images_folder_path.set(folder)
@@ -925,18 +1069,9 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     
     def browse_placeholder_image(self):
         """Выбор изображения-заглушки"""
-        file_types = [
-            ("Изображения", "*.jpg *.jpeg *.png *.gif *.webp"),
-            ("JPEG", "*.jpg *.jpeg"),
-            ("PNG", "*.png"),
-            ("GIF", "*.gif"),
-            ("WebP", "*.webp"),
-            ("Все файлы", "*.*")
-        ]
-        
         image_path = filedialog.askopenfilename(
             title="Выберите изображение-заглушку", 
-            filetypes=file_types
+            filetypes=IMAGE_FILETYPES
         )
         
         if image_path:
@@ -955,14 +1090,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             # Создаем временный объект SFTP загрузчика для проверки
             from sftp_uploader import SFTPImageUploader
             
-            ssh_config = {
-                'host': self.ssh_host.get(),
-                'port': self.ssh_port.get(),
-                'username': self.ssh_username.get(),
-                'password': self.ssh_password.get(),
-                'remote_base_path': self.ssh_remote_path.get(),
-                'web_domain': self.ssh_web_domain.get()
-            }
+            ssh_config = self._get_ssh_config()
             
             uploader = SFTPImageUploader(**ssh_config)
             uploader.set_log_callback(self.log_message)
@@ -987,17 +1115,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def save_ssh_config(self):
         """Сохранение конфигурации SFTP в gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            # Читаем текущий файл настроек
-            if os.path.exists(gui_settings_file):
-                with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-            else:
-                settings = {}
-            
-            # Обновляем SFTP настройки
-            settings.update({
+            self._update_settings({
                 'sftp_host': self.ssh_host.get(),
                 'sftp_port': self.ssh_port.get(),
                 'sftp_username': self.ssh_username.get(),
@@ -1005,10 +1123,6 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 'sftp_remote_base_path': self.ssh_remote_path.get(),
                 'sftp_web_domain': self.ssh_web_domain.get()
             })
-            
-            # Сохраняем обновленные настройки
-            with open(gui_settings_file, 'w', encoding='utf-8') as f:
-                json.dump(settings, f, indent=2, ensure_ascii=False)
                     
             self.log_message(f"✅ Настройки SFTP сохранены в gui_settings.json")
             messagebox.showinfo("Сохранено", "Настройки SFTP успешно сохранены в gui_settings.json")
@@ -1020,28 +1134,19 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def load_ssh_config(self):
         """Перезагрузка конфигурации SFTP из gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            if not os.path.exists(gui_settings_file):
+            if not os.path.exists(SETTINGS_FILE):
                 messagebox.showwarning("Внимание", "Файл gui_settings.json не найден")
                 return
                 
-            with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                    
-            # Загружаем SFTP настройки если они есть
-            if 'sftp_host' in settings:
-                self.ssh_host.set(settings['sftp_host'])
-            if 'sftp_port' in settings:
-                self.ssh_port.set(settings['sftp_port'])
-            if 'sftp_username' in settings:
-                self.ssh_username.set(settings['sftp_username'])
-            if 'sftp_password' in settings:
-                self.ssh_password.set(settings['sftp_password'])
-            if 'sftp_remote_base_path' in settings:
-                self.ssh_remote_path.set(settings['sftp_remote_base_path'])
-            if 'sftp_web_domain' in settings:
-                self.ssh_web_domain.set(settings['sftp_web_domain'])
+            settings = self._load_settings_file()
+            self._apply_settings(settings, {
+                'sftp_host': self.ssh_host,
+                'sftp_port': self.ssh_port,
+                'sftp_username': self.ssh_username,
+                'sftp_password': self.ssh_password,
+                'sftp_remote_base_path': self.ssh_remote_path,
+                'sftp_web_domain': self.ssh_web_domain
+            })
                     
             self.log_message(f"✅ Настройки SFTP перезагружены из gui_settings.json")
             messagebox.showinfo("Загружено", "Настройки SFTP успешно перезагружены из gui_settings.json")
@@ -1091,17 +1196,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def save_wc_config(self):
         """Сохранение конфигурации WooCommerce в gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            # Читаем текущий файл настроек
-            if os.path.exists(gui_settings_file):
-                with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-            else:
-                settings = {}
-            
-            # Обновляем WooCommerce настройки
-            settings.update({
+            self._update_settings({
                 'wc_url': self.wc_url.get(),
                 'wc_consumer_key': self.wc_consumer_key.get(),
                 'wc_consumer_secret': self.wc_consumer_secret.get(),
@@ -1110,10 +1205,6 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 'wp_app_password': self.wp_app_password.get(),
                 'wp_email': self.wp_email.get()
             })
-            
-            # Сохраняем обновленные настройки
-            with open(gui_settings_file, 'w', encoding='utf-8') as f:
-                json.dump(settings, f, indent=2, ensure_ascii=False)
                     
             self.log_message(f"✅ Настройки WooCommerce сохранены в gui_settings.json")
             messagebox.showinfo("Сохранено", "Настройки WooCommerce успешно сохранены в gui_settings.json")
@@ -1125,30 +1216,20 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def load_wc_config(self):
         """Перезагрузка конфигурации WooCommerce из gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            if not os.path.exists(gui_settings_file):
+            if not os.path.exists(SETTINGS_FILE):
                 messagebox.showwarning("Внимание", "Файл gui_settings.json не найден")
                 return
                 
-            with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                    
-            # Загружаем WooCommerce настройки если они есть
-            if 'wc_url' in settings:
-                self.wc_url.set(settings['wc_url'])
-            if 'wc_consumer_key' in settings:
-                self.wc_consumer_key.set(settings['wc_consumer_key'])
-            if 'wc_consumer_secret' in settings:
-                self.wc_consumer_secret.set(settings['wc_consumer_secret'])
-            if 'wc_timeout' in settings:
-                self.wc_timeout.set(settings['wc_timeout'])
-            if 'wp_username' in settings:
-                self.wp_username.set(settings['wp_username'])
-            if 'wp_app_password' in settings:
-                self.wp_app_password.set(settings['wp_app_password'])
-            if 'wp_email' in settings:
-                self.wp_email.set(settings['wp_email'])
+            settings = self._load_settings_file()
+            self._apply_settings(settings, {
+                'wc_url': self.wc_url,
+                'wc_consumer_key': self.wc_consumer_key,
+                'wc_consumer_secret': self.wc_consumer_secret,
+                'wc_timeout': self.wc_timeout,
+                'wp_username': self.wp_username,
+                'wp_app_password': self.wp_app_password,
+                'wp_email': self.wp_email
+            })
                     
             self.log_message(f"✅ Настройки WooCommerce перезагружены из gui_settings.json")
             messagebox.showinfo("Загружено", "Настройки WooCommerce успешно перезагружены из gui_settings.json")
@@ -1174,6 +1255,17 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             pass
         finally:
             self.root.after(100, self.process_ui_queue)
+
+    def _show_message_async(self, kind: str, title: str, text: str):
+        def _show():
+            if kind == "info":
+                messagebox.showinfo(title, text)
+            elif kind == "warning":
+                messagebox.showwarning(title, text)
+            else:
+                messagebox.showerror(title, text)
+
+        self.root.after(0, _show)
 
     def _log_to_widget(self, message):
         """Вставляет отформатированное сообщение в виджет лога. Должен выполняться в основном потоке."""
@@ -1294,29 +1386,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         self.stop_button.config(state=tk.NORMAL)
         self.clear_log()
         self.log_message(f"▶️ Запуск загрузки...")
-
-        # Собираем конфигурацию SSH
-        ssh_config = {
-            'host': self.ssh_host.get(),
-            'port': self.ssh_port.get(),
-            'username': self.ssh_username.get(),
-            'password': self.ssh_password.get(),
-            'remote_base_path': self.ssh_remote_path.get(),
-            'web_domain': self.ssh_web_domain.get()
-        }
-
-        # Создаем экземпляр загрузчика с правильными параметрами
-        self.uploader = WooCommerceFIFUUploader(
-            wc_url=self.wc_url.get(),
-            wc_consumer_key=self.wc_consumer_key.get(),
-            wc_consumer_secret=self.wc_consumer_secret.get(),
-            ssh_config=ssh_config,
-            wp_username=self.wp_username.get(),
-            wp_app_password=self.wp_app_password.get()
-        )
-        
-        self.uploader.set_progress_callback(self.update_progress)
-        self.uploader.set_log_callback(self.log_message)
+        self.uploader = self._create_uploader()
         
         count = self.custom_count.get() if self.products_count.get() == "custom" else None
         selected_fields = [field for field, var in self.column_vars.items() if var.get()]
@@ -1349,56 +1419,16 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             # Настройка callback'ов. Теперь они просто кладут данные в очередь.
             log_wrapper = self.log_message
             
-            # Создание загрузчика в зависимости от выбранного режима
-            wc_cfg = WOOCOMMERCE_CONFIG
-            
-            if self.use_fifu.get():
-                # Используем FIFU загрузчик с SFTP
-                self.log_message("📡 Режим: FIFU с загрузкой на SFTP")
-                
-                # Конфигурация SSH
-                ssh_config = {
-                    'host': self.ssh_host.get(),
-                    'port': self.ssh_port.get(),
-                    'username': self.ssh_username.get(),
-                    'password': self.ssh_password.get(),
-                    'remote_base_path': self.ssh_remote_path.get(),
-                    'web_domain': self.ssh_web_domain.get()
-                }
-                
-                # Создаем загрузчик FIFU
-                self.uploader = WooCommerceFIFUUploader(
-                    wc_url=self.wc_url.get(),
-                    wc_consumer_key=self.wc_consumer_key.get(),
-                    wc_consumer_secret=self.wc_consumer_secret.get(),
-                    ssh_config=ssh_config,
-                    wp_username=self.wp_username.get(),
-                    wp_app_password=self.wp_app_password.get()
-                )
+            use_fifu = self.use_fifu.get()
+            if use_fifu:
+                self.log_message("📡 Режим: ExtraURL с загрузкой на SFTP")
             else:
-                # Используем FIFU загрузчик без SFTP (только API WooCommerce)
                 self.log_message("🔄 Режим: Только загрузка в WooCommerce (без SFTP)")
-                
-                # Создаем FIFU загрузчик с пустыми SFTP настройками
-                ssh_config = {
-                    'host': 'localhost',
-                    'port': 22,
-                    'username': 'dummy',
-                    'password': 'dummy',
-                    'remote_base_path': '/tmp',
-                    'web_domain': 'localhost'
-                }
-                
-                self.uploader = WooCommerceFIFUUploader(
-                    wc_url=self.wc_url.get(),
-                    wc_consumer_key=self.wc_consumer_key.get(),
-                    wc_consumer_secret=self.wc_consumer_secret.get(),
-                    ssh_config=ssh_config,
-                    wp_username=self.wp_username.get(),
-                    wp_app_password=self.wp_app_password.get()
-                )
-            
-            # Настраиваем callbacks
+
+            if self.uploader is None:
+                self.uploader = self._create_uploader()
+
+            # Настраиваем callbacks (актуализируем при каждом запуске)
             self.uploader.set_log_callback(log_wrapper)
             self.uploader.set_progress_callback(self.update_progress)
 
@@ -1416,7 +1446,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             else:
                 self.log_message(f"ℹ️ Режим заглушки: Отключен")
             
-            # Используем стандартную загрузку FIFU с выбранным режимом
+            # Используем стандартную загрузку ExtraURL с выбранным режимом
             result = self.uploader.upload_products(
                 csv_file, 
                 images_folder, 
@@ -1458,8 +1488,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         """Выбор нескольких CSV файлов для скачивания изображений"""
         filenames = filedialog.askopenfilenames(
             title="Выберите CSV файлы с URL изображений",
-            initialdir="/home/max-bay/Рабочий стол/Projects/",
-            filetypes=[("CSV файлы", "*.csv"), ("Все файлы", "*.*")]
+            initialdir=self._get_initial_dir(),
+            filetypes=CSV_FILETYPES
         )
         if filenames:
             self.download_csv_files = list(filenames)
@@ -1476,9 +1506,9 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             self.log_message(f"✓ Выбрано {len(filenames)} CSV файлов для скачивания")
             
             # Автоматически определяем колонки из первого файла
-            try:
-                first_file = filenames[0]
-                df_preview = pd.read_csv(first_file, nrows=5, encoding='utf-8', on_bad_lines='skip')
+            first_file = filenames[0]
+            df_preview = self._read_csv_preview(first_file, nrows=5)
+            if df_preview is not None:
                 columns = list(df_preview.columns)
                 self.log_message(f"📋 Найденные колонки в первом файле: {', '.join(columns)}")
                 
@@ -1493,9 +1523,6 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 if sku_candidates:
                     self.download_sku_column.set(sku_candidates[0])
                     self.log_message(f"🎯 Автоматически выбрана колонка SKU: {sku_candidates[0]}")
-                    
-            except Exception as e:
-                self.log_message(f"⚠ Не удалось прочитать CSV для анализа колонок: {e}")
     
     def clear_download_csv_files(self):
         """Очищает список выбранных CSV файлов"""
@@ -1507,7 +1534,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         """Выбор папки для сохранения скачанных изображений"""
         folder = filedialog.askdirectory(
             title="Выберите папку для сохранения изображений",
-            initialdir="/home/max-bay/Рабочий стол/Projects/"
+            initialdir=self._get_initial_dir()
         )
         if folder:
             self.download_output_folder.set(folder)
@@ -1584,7 +1611,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             success_rate = (stats['downloaded'] / stats['total'] * 100) if stats['total'] > 0 else 0
             
             if stats['errors'] == 0:
-                messagebox.showinfo(
+                self._show_message_async(
+                    "info",
                     "Скачивание завершено",
                     f"Скачивание завершено успешно!\n\n"
                     f"Всего записей: {stats['total']}\n"
@@ -1594,7 +1622,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                     f"Успешность: {success_rate:.1f}%"
                 )
             else:
-                messagebox.showwarning(
+                self._show_message_async(
+                    "warning",
                     "Скачивание завершено с ошибками",
                     f"Скачивание завершено!\n\n"
                     f"Всего записей: {stats['total']}\n"
@@ -1607,7 +1636,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             
         except Exception as e:
             self.log_message(f"💥 КРИТИЧЕСКАЯ ОШИБКА при скачивании: {str(e)}")
-            messagebox.showerror("Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
+            self._show_message_async("error", "Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
         finally:
             # Восстанавливаем состояние кнопок
             self.is_downloading = False
@@ -1696,7 +1725,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             success_rate = (total_stats['downloaded'] / total_stats['total'] * 100) if total_stats['total'] > 0 else 0
             
             if total_stats['errors'] == 0:
-                messagebox.showinfo(
+                self._show_message_async(
+                    "info",
                     "Массовое скачивание завершено",
                     f"Скачивание завершено успешно!\n\n"
                     f"Обработано файлов: {total_stats['files_processed']}/{len(csv_files)}\n"
@@ -1707,7 +1737,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                     f"Успешность: {success_rate:.1f}%"
                 )
             else:
-                messagebox.showwarning(
+                self._show_message_async(
+                    "warning",
                     "Массовое скачивание завершено с ошибками",
                     f"Скачивание завершено!\n\n"
                     f"Обработано файлов: {total_stats['files_processed']}/{len(csv_files)}\n"
@@ -1721,7 +1752,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             
         except Exception as e:
             self.log_message(f"💥 КРИТИЧЕСКАЯ ОШИБКА при массовом скачивании: {str(e)}")
-            messagebox.showerror("Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
+            self._show_message_async("error", "Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
         finally:
             # Восстанавливаем состояние кнопок
             self.is_downloading = False
@@ -2034,16 +2065,16 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         """Выбор CSV файла для генерации описаний"""
         filename = filedialog.askopenfilename(
             title="Выберите CSV файл для генерации описаний",
-            initialdir="/home/max-bay/Рабочий стол/Projects/",
-            filetypes=[("CSV файлы", "*.csv"), ("Все файлы", "*.*")]
+            initialdir=self._get_initial_dir(),
+            filetypes=CSV_FILETYPES
         )
         if filename:
             self.ai_csv_file_path.set(filename)
             self.log_message(f"✓ Выбран CSV файл для AI генерации: {os.path.basename(filename)}")
             
             # Автоматически определяем колонки
-            try:
-                df_preview = pd.read_csv(filename, nrows=5, encoding='utf-8', on_bad_lines='skip')
+            df_preview = self._read_csv_preview(filename, nrows=5)
+            if df_preview is not None:
                 columns = list(df_preview.columns)
                 self.log_message(f"📋 Найденные колонки: {', '.join(columns)}")
                 
@@ -2054,47 +2085,29 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 if name_candidates:
                     self.ai_name_column.set(name_candidates[0])
                     self.log_message(f"🎯 Автоматически выбрана колонка названий: {name_candidates[0]}")
-                    
-            except Exception as e:
-                self.log_message(f"⚠ Не удалось прочитать CSV для анализа колонок: {e}")
     
     def load_ai_settings(self):
         """Загрузка настроек AI из gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            if not os.path.exists(gui_settings_file):
+            if not os.path.exists(SETTINGS_FILE):
                 messagebox.showwarning("Внимание", "Файл gui_settings.json не найден")
                 return
-                
-            with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                
-            # Загружаем AI настройки если они есть
-            if 'ai_api_key' in settings:
-                self.ai_api_key.set(settings['ai_api_key'])
-            if 'ai_api_url' in settings:
-                self.ai_api_url.set(settings['ai_api_url'])
-            if 'ai_model' in settings:
-                self.ai_model.set(settings['ai_model'])
-            if 'ai_temperature' in settings:
-                self.ai_temperature.set(settings['ai_temperature'])
-            if 'ai_language' in settings:
-                self.ai_language.set(settings['ai_language'])
-            if 'ai_max_description_length' in settings:
-                self.ai_max_description_length.set(settings['ai_max_description_length'])
-            if 'ai_batch_size' in settings:
-                self.ai_batch_size.set(settings['ai_batch_size'])
-            if 'ai_delay_between_batches' in settings:
-                self.ai_delay_between_batches.set(settings['ai_delay_between_batches'])
-            if 'ai_translate_names' in settings:
-                self.ai_translate_names.set(settings['ai_translate_names'])
-            if 'ai_max_retries' in settings:
-                self.ai_max_retries.set(settings['ai_max_retries'])
-            if 'ai_retry_delay' in settings:
-                self.ai_retry_delay.set(settings['ai_retry_delay'])
-            if 'ai_timeout' in settings:
-                self.ai_timeout.set(settings['ai_timeout'])
+            
+            settings = self._load_settings_file()
+            self._apply_settings(settings, {
+                'ai_api_key': self.ai_api_key,
+                'ai_api_url': self.ai_api_url,
+                'ai_model': self.ai_model,
+                'ai_temperature': self.ai_temperature,
+                'ai_language': self.ai_language,
+                'ai_max_description_length': self.ai_max_description_length,
+                'ai_batch_size': self.ai_batch_size,
+                'ai_delay_between_batches': self.ai_delay_between_batches,
+                'ai_translate_names': self.ai_translate_names,
+                'ai_max_retries': self.ai_max_retries,
+                'ai_retry_delay': self.ai_retry_delay,
+                'ai_timeout': self.ai_timeout
+            })
                 
             self.log_message(f"✅ Настройки AI перезагружены из gui_settings.json")
             messagebox.showinfo("Загружено", "Настройки AI успешно перезагружены из gui_settings.json")
@@ -2106,34 +2119,20 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def save_ai_settings(self):
         """Сохранение настроек AI в gui_settings.json"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            # Читаем текущий файл настроек
-            if os.path.exists(gui_settings_file):
-                with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-            else:
-                settings = {}
-            
-            # Обновляем AI настройки
-            settings.update({
+            self._update_settings({
                 'ai_api_key': self.ai_api_key.get(),
                 'ai_api_url': self.ai_api_url.get(),
                 'ai_model': self.ai_model.get(),
                 'ai_temperature': self.ai_temperature.get(),
                 'ai_language': self.ai_language.get(),
-                            'ai_max_description_length': self.ai_max_description_length.get(),
-            'ai_batch_size': self.ai_batch_size.get(),
-            'ai_delay_between_batches': self.ai_delay_between_batches.get(),
-            'ai_translate_names': self.ai_translate_names.get(),
-            'ai_max_retries': self.ai_max_retries.get(),
-            'ai_retry_delay': self.ai_retry_delay.get(),
-            'ai_timeout': self.ai_timeout.get()
+                'ai_max_description_length': self.ai_max_description_length.get(),
+                'ai_batch_size': self.ai_batch_size.get(),
+                'ai_delay_between_batches': self.ai_delay_between_batches.get(),
+                'ai_translate_names': self.ai_translate_names.get(),
+                'ai_max_retries': self.ai_max_retries.get(),
+                'ai_retry_delay': self.ai_retry_delay.get(),
+                'ai_timeout': self.ai_timeout.get()
             })
-            
-            # Сохраняем обновленные настройки
-            with open(gui_settings_file, 'w', encoding='utf-8') as f:
-                json.dump(settings, f, indent=2, ensure_ascii=False)
                 
             self.log_message(f"✅ Настройки AI сохранены в gui_settings.json")
             messagebox.showinfo("Сохранено", "Настройки AI успешно сохранены в gui_settings.json")
@@ -2228,7 +2227,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             success_rate = (stats['generated'] / stats['total'] * 100) if stats['total'] > 0 else 0
             
             if stats['errors'] == 0:
-                messagebox.showinfo(
+                self._show_message_async(
+                    "info",
                     "Генерация завершена",
                     f"Генерация описаний завершена успешно!\n\n"
                     f"Всего товаров: {stats['total']}\n"
@@ -2238,7 +2238,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                     f"Успешность: {success_rate:.1f}%"
                 )
             else:
-                messagebox.showwarning(
+                self._show_message_async(
+                    "warning",
                     "Генерация завершена с ошибками",
                     f"Генерация описаний завершена!\n\n"
                     f"Всего товаров: {stats['total']}\n"
@@ -2251,7 +2252,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             
         except Exception as e:
             self.log_message(f"💥 КРИТИЧЕСКАЯ ОШИБКА при генерации AI: {str(e)}")
-            messagebox.showerror("Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
+            self._show_message_async("error", "Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
         finally:
             # Восстанавливаем состояние кнопок
             self.is_generating = False
@@ -2262,101 +2263,293 @@ WooCommerce → Настройки → Продвинутые → REST API → �
     def load_settings_on_startup(self):
         """Автоматическая загрузка настроек при запуске приложения"""
         try:
-            gui_settings_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
-            
-            if os.path.exists(gui_settings_file):
-                self.log_message("🔧 Автоматическая загрузка настроек при запуске...")
-                
-                with open(gui_settings_file, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-                
-                # Загружаем SFTP настройки
-                loaded_settings = []
-                if 'sftp_host' in settings:
-                    self.ssh_host.set(settings['sftp_host'])
-                    loaded_settings.append("SFTP")
-                if 'sftp_port' in settings:
-                    self.ssh_port.set(settings['sftp_port'])
-                if 'sftp_username' in settings:
-                    self.ssh_username.set(settings['sftp_username'])
-                if 'sftp_password' in settings:
-                    self.ssh_password.set(settings['sftp_password'])
-                if 'sftp_remote_base_path' in settings:
-                    self.ssh_remote_path.set(settings['sftp_remote_base_path'])
-                if 'sftp_web_domain' in settings:
-                    self.ssh_web_domain.set(settings['sftp_web_domain'])
-                
-                # Загружаем WooCommerce настройки
-                if 'wc_url' in settings:
-                    self.wc_url.set(settings['wc_url'])
-                    loaded_settings.append("WooCommerce")
-                if 'wc_consumer_key' in settings:
-                    self.wc_consumer_key.set(settings['wc_consumer_key'])
-                if 'wc_consumer_secret' in settings:
-                    self.wc_consumer_secret.set(settings['wc_consumer_secret'])
-                if 'wc_timeout' in settings:
-                    self.wc_timeout.set(settings['wc_timeout'])
-                if 'wp_username' in settings:
-                    self.wp_username.set(settings['wp_username'])
-                if 'wp_app_password' in settings:
-                    self.wp_app_password.set(settings['wp_app_password'])
-                if 'wp_email' in settings:
-                    self.wp_email.set(settings['wp_email'])
-                
-                # Загружаем AI настройки
-                ai_loaded = False
-                if 'ai_api_key' in settings and settings['ai_api_key']:
-                    self.ai_api_key.set(settings['ai_api_key'])
-                    ai_loaded = True
-                if 'ai_api_url' in settings:
-                    self.ai_api_url.set(settings['ai_api_url'])
-                    ai_loaded = True
-                if 'ai_model' in settings:
-                    self.ai_model.set(settings['ai_model'])
-                    ai_loaded = True
-                if 'ai_temperature' in settings:
-                    self.ai_temperature.set(settings['ai_temperature'])
-                    ai_loaded = True
-                if 'ai_language' in settings:
-                    self.ai_language.set(settings['ai_language'])
-                    ai_loaded = True
-                if 'ai_max_description_length' in settings:
-                    self.ai_max_description_length.set(settings['ai_max_description_length'])
-                    ai_loaded = True
-                if 'ai_batch_size' in settings:
-                    self.ai_batch_size.set(settings['ai_batch_size'])
-                    ai_loaded = True
-                if 'ai_delay_between_batches' in settings:
-                    self.ai_delay_between_batches.set(settings['ai_delay_between_batches'])
-                    ai_loaded = True
-                if 'ai_translate_names' in settings:
-                    self.ai_translate_names.set(settings['ai_translate_names'])
-                    ai_loaded = True
-                if 'ai_max_retries' in settings:
-                    self.ai_max_retries.set(settings['ai_max_retries'])
-                    ai_loaded = True
-                if 'ai_retry_delay' in settings:
-                    self.ai_retry_delay.set(settings['ai_retry_delay'])
-                    ai_loaded = True
-                if 'ai_timeout' in settings:
-                    self.ai_timeout.set(settings['ai_timeout'])
-                    ai_loaded = True
-                
-                if ai_loaded:
-                    loaded_settings.append("AI")
-                
-                if loaded_settings:
-                    settings_str = ", ".join(loaded_settings)
-                    self.log_message(f"✅ Настройки загружены: {settings_str}")
-                else:
-                    self.log_message("⚠️ Файл настроек найден, но настройки не загружены")
-                    
-            else:
+            if not os.path.exists(SETTINGS_FILE):
                 self.log_message("📋 Файл gui_settings.json не найден - используются настройки по умолчанию")
+                return
+
+            self.log_message("🔧 Автоматическая загрузка настроек при запуске...")
+            settings = self._load_settings_file()
+
+            loaded_settings = []
+
+            if any(k in settings for k in ['sftp_host', 'sftp_port', 'sftp_username', 'sftp_password', 'sftp_remote_base_path', 'sftp_web_domain']):
+                self._apply_settings(settings, {
+                    'sftp_host': self.ssh_host,
+                    'sftp_port': self.ssh_port,
+                    'sftp_username': self.ssh_username,
+                    'sftp_password': self.ssh_password,
+                    'sftp_remote_base_path': self.ssh_remote_path,
+                    'sftp_web_domain': self.ssh_web_domain
+                })
+                loaded_settings.append("SFTP")
+
+            if any(k in settings for k in ['wc_url', 'wc_consumer_key', 'wc_consumer_secret', 'wc_timeout', 'wp_username', 'wp_app_password', 'wp_email']):
+                self._apply_settings(settings, {
+                    'wc_url': self.wc_url,
+                    'wc_consumer_key': self.wc_consumer_key,
+                    'wc_consumer_secret': self.wc_consumer_secret,
+                    'wc_timeout': self.wc_timeout,
+                    'wp_username': self.wp_username,
+                    'wp_app_password': self.wp_app_password,
+                    'wp_email': self.wp_email
+                })
+                loaded_settings.append("WooCommerce")
+
+            if any(k in settings for k in [
+                'ai_api_key', 'ai_api_url', 'ai_model', 'ai_temperature', 'ai_language',
+                'ai_max_description_length', 'ai_batch_size', 'ai_delay_between_batches',
+                'ai_translate_names', 'ai_max_retries', 'ai_retry_delay', 'ai_timeout'
+            ]):
+                self._apply_settings(settings, {
+                    'ai_api_key': self.ai_api_key,
+                    'ai_api_url': self.ai_api_url,
+                    'ai_model': self.ai_model,
+                    'ai_temperature': self.ai_temperature,
+                    'ai_language': self.ai_language,
+                    'ai_max_description_length': self.ai_max_description_length,
+                    'ai_batch_size': self.ai_batch_size,
+                    'ai_delay_between_batches': self.ai_delay_between_batches,
+                    'ai_translate_names': self.ai_translate_names,
+                    'ai_max_retries': self.ai_max_retries,
+                    'ai_retry_delay': self.ai_retry_delay,
+                    'ai_timeout': self.ai_timeout
+                })
+                loaded_settings.append("AI")
+
+            if loaded_settings:
+                settings_str = ", ".join(loaded_settings)
+                self.log_message(f"✅ Настройки загружены: {settings_str}")
+            else:
+                self.log_message("⚠️ Файл настроек найден, но настройки не загружены")
                 
         except Exception as e:
             self.log_message(f"❌ Ошибка при загрузке настроек: {str(e)}")
-            
+
+    def setup_image_processing_tab(self, notebook):
+        """Настройка вкладки обработки изображений"""
+        # Создаем прокручиваемый фрейм
+        scrollable_tab = ScrollableFrame(notebook)
+        notebook.add(scrollable_tab, text="Обработка изображений")
+        process_frame = scrollable_tab.scrollable_frame
+
+        # Настройки папок
+        folders_frame = ttk.LabelFrame(process_frame, text="Папки", padding=10)
+        folders_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        # Исходная папка
+        source_frame = tk.Frame(folders_frame)
+        source_frame.pack(fill=tk.X, pady=(0, 5))
+
+        tk.Label(source_frame, text="Исходная папка:", width=20, anchor='w').pack(side=tk.LEFT)
+        source_entry = tk.Entry(source_frame, textvariable=self.process_source_folder)
+        source_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 5))
+        tk.Button(source_frame, text="Выбрать", command=self.browse_process_source_folder).pack(side=tk.RIGHT)
+
+        # Папка для результатов
+        output_frame = tk.Frame(folders_frame)
+        output_frame.pack(fill=tk.X, pady=(0, 10))
+
+        tk.Label(output_frame, text="Папка результатов:", width=20, anchor='w').pack(side=tk.LEFT)
+        output_entry = tk.Entry(output_frame, textvariable=self.process_output_folder)
+        output_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 5))
+        tk.Button(output_frame, text="Выбрать", command=self.browse_process_output_folder).pack(side=tk.RIGHT)
+
+        # Настройки обработки
+        processing_frame = ttk.LabelFrame(process_frame, text="Настройки обработки", padding=10)
+        processing_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        # Количество потоков
+        threads_frame = tk.Frame(processing_frame)
+        threads_frame.pack(fill=tk.X, pady=(0, 5))
+
+        tk.Label(threads_frame, text="Количество потоков:", width=20, anchor='w').pack(side=tk.LEFT)
+        tk.Spinbox(
+            threads_frame,
+            from_=1,
+            to=10,
+            width=8,
+            textvariable=self.process_max_workers
+        ).pack(side=tk.LEFT)
+
+        # Кнопки управления
+        buttons_frame = tk.Frame(process_frame)
+        buttons_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        self.process_start_button = tk.Button(
+            buttons_frame,
+            text="Начать обработку",
+            command=self.start_image_processing,
+            bg='#27ae60',
+            fg='white',
+            font=("Arial", 11, "bold"),
+            padx=20,
+            pady=5
+        )
+        self.process_start_button.pack(side=tk.LEFT, padx=(0, 10))
+
+        self.process_stop_button = tk.Button(
+            buttons_frame,
+            text="Остановить",
+            command=self.stop_image_processing,
+            bg='#e74c3c',
+            fg='white',
+            font=("Arial", 11, "bold"),
+            padx=20,
+            pady=5,
+            state=tk.DISABLED
+        )
+        self.process_stop_button.pack(side=tk.LEFT)
+
+        # Информация
+        info_frame = ttk.LabelFrame(process_frame, text="Информация", padding=10)
+        info_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        info_text = """
+🖼️ ОБРАБОТКА ИЗОБРАЖЕНИЙ:
+
+🎯 ФУНКЦИОНАЛЬНОСТЬ:
+• Преобразование изображений в унифицированный формат 2560x1440
+• Анализ качества и умное масштабирование
+• Размещение изображений по центру белого холста
+• Поддержка множественных форматов (JPG, PNG, WebP, BMP, TIFF)
+
+📁 РАБОТА С ПАПКАМИ:
+• Выберите исходную папку с изображениями для обработки
+• Укажите папку для сохранения результатов
+• Обрабатываются все поддерживаемые форматы в исходной папке
+
+⚡ ПАРАЛЛЕЛЬНАЯ ОБРАБОТКА:
+• Настройте количество потоков для ускорения обработки
+• Рекомендуется 2-4 потока в зависимости от мощности ПК
+• Подробная статистика обработки для каждого файла
+
+📊 РЕЗУЛЬТАТЫ:
+• Подробный лог обработки с информацией о каждом изображении
+• Статистика по качеству, размерам и масштабированию
+• Сохранение результатов в указанную папку
+• Поддержка кириллицы в именах файлов
+
+🔧 ТЕХНИЧЕСКИЕ ДЕТАЛИ:
+• Автоматическое определение оптимального масштаба
+• Повышение резкости при необходимости
+• Сохранение в формате JPEG с качеством 100%
+• Центрирование изображений на белом фоне
+        """
+
+        tk.Label(
+            info_frame,
+            text=info_text,
+            justify=tk.LEFT,
+            wraplength=750,
+            anchor='nw'
+        ).pack(fill=tk.BOTH, expand=True)
+
+    def browse_process_source_folder(self):
+        """Выбор исходной папки для обработки изображений"""
+        folder = filedialog.askdirectory(
+            title="Выберите папку с изображениями для обработки",
+            initialdir=self._get_initial_dir()
+        )
+        if folder:
+            self.process_source_folder.set(folder)
+            self.log_message(f"✓ Выбрана исходная папка: {os.path.basename(folder)}")
+
+    def browse_process_output_folder(self):
+        """Выбор папки для сохранения обработанных изображений"""
+        folder = filedialog.askdirectory(
+            title="Выберите папку для сохранения результатов",
+            initialdir=self._get_initial_dir()
+        )
+        if folder:
+            self.process_output_folder.set(folder)
+            self.log_message(f"✓ Выбрана папка результатов: {os.path.basename(folder)}")
+
+    def start_image_processing(self):
+        """Запуск обработки изображений"""
+        if self.is_processing_images:
+            messagebox.showwarning("Внимание", "Обработка уже идет.")
+            return
+
+        source_folder = self.process_source_folder.get()
+        if not source_folder:
+            messagebox.showerror("Ошибка", "Не выбрана исходная папка.")
+            return
+
+        if not os.path.exists(source_folder):
+            messagebox.showerror("Ошибка", "Выбранная папка не существует.")
+            return
+
+        output_folder = self.process_output_folder.get()
+        if not output_folder:
+            messagebox.showerror("Ошибка", "Не указана папка для результатов.")
+            return
+
+        self.is_processing_images = True
+        self.process_start_button.config(state=tk.DISABLED)
+        self.process_stop_button.config(state=tk.NORMAL)
+
+        self.log_message("🖼️ Запуск обработки изображений...")
+
+        # Запуск в отдельном потоке
+        processing_thread = threading.Thread(
+            target=self.image_processing_worker,
+            args=(source_folder, output_folder),
+            daemon=True
+        )
+        processing_thread.start()
+
+    def stop_image_processing(self):
+        """Остановка обработки изображений"""
+        self._process_stop_flag = True
+        if self.image_processor:
+            self.log_message("⚠ Получен сигнал остановки обработки изображений...")
+
+    def image_processing_worker(self, source_folder: str, output_folder: str):
+        """Рабочий процесс обработки изображений"""
+        try:
+            # Сбрасываем флаг остановки
+            self._process_stop_flag = False
+
+            # Импортируем и создаем обработчик изображений
+            from image_converter import ImageConverter
+
+            self.log_message("🔧 Инициализация обработчика изображений...")
+            self.image_processor = ImageConverter(source_folder, output_folder, log_callback=self.log_message)
+
+            # Запускаем обработку
+            self.log_message("=" * 50)
+            self.log_message("🚀 НАЧАЛО ОБРАБОТКИ ИЗОБРАЖЕНИЙ")
+            self.log_message("=" * 50)
+
+            # Проверяем, не остановлена ли обработка
+            if self._process_stop_flag:
+                self.log_message("⚠️ Обработка остановлена пользователем")
+                return
+
+            # Запускаем обработку
+            self.image_processor.convert_images(max_workers=self.process_max_workers.get())
+
+            # Сообщаем о завершении
+            self.log_message("\n" + "=" * 50)
+            self.log_message("✅ ОБРАБОТКА ИЗОБРАЖЕНИЙ ЗАВЕРШЕНА")
+            self.log_message("=" * 50)
+
+            self._show_message_async(
+                "info",
+                "Обработка завершена",
+                f"Обработка изображений завершена!\n\nРезультаты сохранены в: {output_folder}"
+            )
+
+        except Exception as e:
+            self.log_message(f"💥 КРИТИЧЕСКАЯ ОШИБКА при обработке изображений: {str(e)}")
+            self._show_message_async("error", "Критическая ошибка", f"Произошла критическая ошибка:\n{str(e)}")
+        finally:
+            # Восстанавливаем состояние кнопок
+            self.is_processing_images = False
+            self.process_start_button.config(state=tk.NORMAL)
+            self.process_stop_button.config(state=tk.DISABLED)
+            self.image_processor = None
+
     def run(self):
         """Запуск приложения"""
         self.root.mainloop()

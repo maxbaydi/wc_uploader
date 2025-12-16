@@ -179,26 +179,26 @@ class ImageDownloader:
     def normalize_filename(self, filename: str) -> str:
         """
         Нормализует имя файла, оставляя только буквы и цифры.
-        
+
         Args:
             filename: Исходное имя файла (SKU/артикул)
-            
+
         Returns:
             str: Нормализованное имя файла (только буквы и цифры)
         """
         if not filename:
             return "unnamed"
-            
+
         # Убираем пробелы в начале и конце
         filename = filename.strip()
-        
+
         # Оставляем только буквы и цифры, удаляем все остальные символы
         normalized = re.sub(r'[^A-Za-z0-9А-Яа-яЁё]', '', filename)
-        
+
         # Если после очистки ничего не осталось, используем fallback
         if not normalized:
             normalized = "unnamed"
-        
+
         # Приводим к нижнему регистру
         return normalized.lower()
     

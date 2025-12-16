@@ -1,0 +1,23 @@
+# Основные зависимости приложения
+woocommerce==3.0.0
+requests==2.31.0
+pandas==2.3.0
+numpy==2.3.1
+pillow==10.0.1
+pillow-avif-plugin==1.4.6
+paramiko==3.5.1
+tkinter-tooltip==2.0.0
+ttkbootstrap==1.10.1
+
+# Зависимости для сборки
+pyinstaller==6.3.0
+pyinstaller-hooks-contrib==2024.0
+
+# Дополнительные зависимости для совместимости
+urllib3==2.0.7
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+cryptography==41.0.8
+bcrypt==4.1.2
+pynacl==1.5.0

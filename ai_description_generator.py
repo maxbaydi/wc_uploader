@@ -54,6 +54,7 @@ class AIDescriptionGenerator:
             'generated': 0,
             'errors': 0,
             'skipped': 0,
+            'already_had_descriptions': 0,
             'batches': 0,
             'retries': 0,
             'failed_after_retries': 0
@@ -374,6 +375,7 @@ class AIDescriptionGenerator:
         """
         self.log_message("=" * 50)
         self.log_message("🤖 НАЧАЛО ГЕНЕРАЦИИ AI ОПИСАНИЙ")
+        self.log_message("🔍 Режим: обработка товаров без описаний")
         self.log_message("=" * 50)
         
         try:
@@ -396,7 +398,33 @@ class AIDescriptionGenerator:
             df_filtered = df.dropna(subset=[name_column])
             df_filtered[name_column] = df_filtered[name_column].astype(str)
             df_filtered = df_filtered[df_filtered[name_column].str.strip() != '']
-            
+
+            # Проверяем наличие столбца description и фильтруем товары без описаний
+            if 'description' in df.columns:
+                self.log_message("🔍 Найден столбец 'description', проверяю товары без описаний...")
+
+                # Определяем товары без описаний (пустые, NaN или только пробелы)
+                mask_no_description = (
+                    df_filtered['description'].isna() |
+                    (df_filtered['description'].astype(str).str.strip() == '')
+                )
+
+                products_without_descriptions = df_filtered[mask_no_description]
+
+                if len(products_without_descriptions) > 0:
+                    products_with_descriptions = len(df_filtered) - len(products_without_descriptions)
+                    self.stats['already_had_descriptions'] = products_with_descriptions
+                    self.log_message(f"📝 Найдено {len(products_without_descriptions)} товаров без описаний из {len(df_filtered)}")
+                    self.log_message(f"✅ Товаров с существующими описаниями: {products_with_descriptions}")
+                    df_filtered = products_without_descriptions
+                else:
+                    self.log_message("✅ Все товары уже имеют описания!")
+                    self.stats['total'] = 0
+                    self.stats['already_had_descriptions'] = len(df_filtered)
+                    return self.stats
+            else:
+                self.log_message("📝 Столбец 'description' не найден, будет создан новый")
+
             product_names = df_filtered[name_column].tolist()
             self.stats['total'] = len(product_names)
             
@@ -475,7 +503,12 @@ class AIDescriptionGenerator:
                         self.log_message(f"🔄 Название обновлено: '{product_name}' -> '{product_data['name']}'")
                     
                 elif pd.isna(row.get('description', '')) or row.get('description', '').strip() == '':
-                    self.stats['skipped'] += 1
+                    # Если столбец description существовал изначально, то пустые описания означают,
+                    # что товар не был обработан (например, ошибка генерации)
+                    if 'description' in df.columns:
+                        self.stats['errors'] += 1
+                    else:
+                        self.stats['skipped'] += 1
                     
             # Сохраняем обновленный CSV
             output_file = csv_file
@@ -486,7 +519,10 @@ class AIDescriptionGenerator:
             self.log_message("\n" + "=" * 50) 
             self.log_message("📊 РЕЗУЛЬТАТЫ ГЕНЕРАЦИИ ОПИСАНИЙ")
             self.log_message("=" * 50)
-            self.log_message(f"Всего товаров: {self.stats['total']}")
+            total_products_in_file = self.stats['total'] + self.stats['already_had_descriptions']
+            self.log_message(f"Всего товаров в файле: {total_products_in_file}")
+            self.log_message(f"Товаров без описаний: {self.stats['total']}")
+            self.log_message(f"Товаров с существующими описаниями: {self.stats['already_had_descriptions']}")
             self.log_message(f"Сгенерировано описаний: {self.stats['generated']}")
             self.log_message(f"Пропущено: {self.stats['skipped']}")
             self.log_message(f"Ошибки: {self.stats['errors']}")
@@ -505,8 +541,8 @@ class AIDescriptionGenerator:
             
             if self.stats['total'] > 0:
                 success_rate = (self.stats['generated'] / self.stats['total']) * 100
-                self.log_message(f"\n✅ Общая успешность: {success_rate:.1f}%")
-                
+                self.log_message(f"\n✅ Успешность генерации: {success_rate:.1f}% ({self.stats['generated']} из {self.stats['total']} товаров без описаний)")
+
                 # Расчет экономии благодаря retry
                 if self.stats['retries'] > 0:
                     saved_products = self.stats['retries'] - self.stats['failed_after_retries']
@@ -521,46 +557,3 @@ class AIDescriptionGenerator:
         except Exception as e:
             self.log_message(f"💥 КРИТИЧЕСКАЯ ОШИБКА: {str(e)}")
             raise e
-
-
-def test_ai_generator():
-    """Функция для тестирования генератора описаний"""
-    print("🧪 Тестирование AI генератора описаний...")
-    
-    # Тестовые настройки (заглушки)
-    generator = AIDescriptionGenerator(
-        api_key="test-key",
-        api_url="https://api.vsegpt.ru/v1/chat/completions",
-        model="gpt-3.5-turbo",
-        temperature=0.7
-    )
-    
-    # Тест создания промта
-    test_names = ["Маркировка для проводов UCT-WMCO 6,8", "Усадочный кембрик WMS-2 HF 3,2"]
-    prompt = generator.create_batch_prompt(test_names, "русский", 300)
-    
-    print("✅ Промт создан успешно")
-    print(f"Длина промта: {len(prompt)} символов")
-    
-    # Тест обработки ответа
-    test_response = {
-        "descriptions": [
-            {"id": 1, "name": "Wire Labels UCT-WMCO 6.8", "description": "High-quality wire labels for professional identification"},
-            {"id": 2, "name": "Heat Shrink Tubing WMS-2 HF 3.2", "description": "Reliable heat shrink tubing for connection protection"}
-        ]
-    }
-    
-    product_data = generator.process_ai_response(test_response, test_names)
-    print(f"✅ Обработано товаров: {len(product_data)}")
-    
-    # Проверяем структуру данных
-    for original_name, data in product_data.items():
-        print(f"📦 {original_name}:")
-        print(f"   Переведенное название: {data['name']}")
-        print(f"   Описание: {data['description'][:50]}...")
-    
-    print("🎉 Все тесты прошли успешно!")
-
-
-if __name__ == "__main__":
-    test_ai_generator()

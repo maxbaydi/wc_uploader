@@ -18,6 +18,9 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 import unicodedata
+from image_converter import ImageConverter
+import tempfile
+import shutil
 
 # Настройка прокси для всего процесса Python
 if PROXY_CONFIG["disable_proxy"]:
@@ -999,60 +1002,147 @@ class WooCommerceFIFUUploader:
     def clean_sku_for_image(self, sku):
         """
         Очистка SKU для поиска изображения
-        
+
         Args:
             sku: Исходный SKU
-            
+
         Returns:
             str: Очищенный SKU для поиска изображения
         """
         if not sku:
             return ""
-            
-        # Очищаем SKU от специальных символов
+
+        # Очищаем SKU от пробелов
         clean_sku = str(sku).strip()
-        
-        # Удаляем все символы, кроме букв, цифр и дефисов
-        clean_sku = re.sub(r'[^a-zA-Z0-9\-]', '', clean_sku)
-        
+
         return clean_sku
         
     def find_product_image(self, sku, images_folder):
         """
-        Поиск изображения товара по SKU
-        
+        Поиск изображения товара по SKU с несколькими стратегиями поиска
+
         Args:
-            sku: SKU товара (очищенный)
+            sku: SKU товара (оригинальный)
             images_folder: Папка с изображениями
-            
+
         Returns:
             str: Путь к изображению или None, если не найдено
         """
         if not sku or not images_folder:
             return None
-            
+
         # Проверяем существование папки
         if not os.path.isdir(images_folder):
             self.log(f"❌ Папка с изображениями не найдена: {images_folder}")
             return None
-            
-        # Ищем изображение по точному совпадению SKU
+
         extensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif']
-        
+        sku_lower = sku.lower()
+
+        # Стратегия 1: Точное совпадение с оригинальным SKU
+        self.log(f"🔍 Поиск изображения для SKU: {sku}")
         for ext in extensions:
             image_path = os.path.join(images_folder, f"{sku}{ext}")
             if os.path.exists(image_path):
+                self.log(f"✅ Найдено точное совпадение: {os.path.basename(image_path)}")
                 return image_path
-                
-        # Если не нашли по точному совпадению, ищем по началу имени файла
+
+            # Также проверяем вариант в нижнем регистре
+            image_path_lower = os.path.join(images_folder, f"{sku_lower}{ext}")
+            if os.path.exists(image_path_lower):
+                self.log(f"✅ Найдено точное совпадение (нижний регистр): {os.path.basename(image_path_lower)}")
+                return image_path_lower
+
+        # Стратегия 2: Поиск с заменой разделителей на разные варианты
+        normalized_skus = self._generate_normalized_skus(sku)
+        for norm_sku in normalized_skus:
+            if norm_sku != sku:  # Пропускаем если это тот же SKU
+                for ext in extensions:
+                    image_path = os.path.join(images_folder, f"{norm_sku}{ext}")
+                    if os.path.exists(image_path):
+                        self.log(f"✅ Найдено с нормализацией: {os.path.basename(image_path)}")
+                        return image_path
+
+                    # Также проверяем вариант в нижнем регистре
+                    image_path_lower = os.path.join(images_folder, f"{norm_sku.lower()}{ext}")
+                    if os.path.exists(image_path_lower):
+                        self.log(f"✅ Найдено с нормализацией (нижний регистр): {os.path.basename(image_path_lower)}")
+                        return image_path_lower
+
+        # Стратегия 3: Поиск файлов, которые начинаются с SKU (с учетом разделителей)
         for filename in os.listdir(images_folder):
             file_path = os.path.join(images_folder, filename)
-            if os.path.isfile(file_path) and filename.lower().startswith(sku.lower()):
+            if os.path.isfile(file_path):
+                filename_lower = filename.lower()
                 _, ext = os.path.splitext(filename)
                 if ext.lower() in extensions:
-                    return file_path
-                    
+                    # Проверяем, начинается ли файл с SKU
+                    if filename_lower.startswith(sku_lower):
+                        self.log(f"✅ Найдено по началу файла: {filename}")
+                        return file_path
+
+                    # Проверяем с нормализованными вариантами
+                    for norm_sku in normalized_skus:
+                        if filename_lower.startswith(norm_sku.lower()):
+                            self.log(f"✅ Найдено по началу файла с нормализацией: {filename}")
+                            return file_path
+
+        # Стратегия 4: Поиск файлов, которые содержат SKU где-то в имени
+        for filename in os.listdir(images_folder):
+            file_path = os.path.join(images_folder, filename)
+            if os.path.isfile(file_path):
+                filename_lower = filename.lower()
+                _, ext = os.path.splitext(filename)
+                if ext.lower() in extensions:
+                    # Проверяем, содержит ли файл SKU
+                    if sku_lower in filename_lower:
+                        self.log(f"✅ Найдено по содержанию SKU: {filename}")
+                        return file_path
+
+                    # Проверяем с нормализованными вариантами
+                    for norm_sku in normalized_skus:
+                        if norm_sku.lower() in filename_lower:
+                            self.log(f"✅ Найдено по содержанию SKU с нормализацией: {filename}")
+                            return file_path
+
+        self.log(f"❌ Изображение для SKU {sku} не найдено")
         return None
+
+    def _generate_normalized_skus(self, sku):
+        """
+        Генерирует различные нормализованные варианты SKU для поиска
+
+        Args:
+            sku: Оригинальный SKU
+
+        Returns:
+            list: Список нормализованных вариантов SKU
+        """
+        variants = []
+
+        # Оригинальный SKU
+        variants.append(sku)
+
+        # Заменяем дефисы на подчеркивания и наоборот
+        variants.append(sku.replace('-', '_'))
+        variants.append(sku.replace('_', '-'))
+
+        # Удаляем все разделители (дефисы, подчеркивания, точки)
+        import re
+        no_separators = re.sub(r'[-_.]', '', sku)
+        if no_separators != sku:
+            variants.append(no_separators)
+
+        # Заменяем точки на дефисы
+        variants.append(sku.replace('.', '-'))
+
+        # Убираем повторяющиеся разделители
+        clean_sku = re.sub(r'[-_.]+', '-', sku)
+        if clean_sku != sku:
+            variants.append(clean_sku)
+
+        # Возвращаем только уникальные варианты
+        return list(set(variants))
 
     def batch_process_products(self, df, images_folder, skip_existing=True, update_mode='all', batch_size=100, use_marketing_text=True):
         """
@@ -1162,11 +1252,11 @@ class WooCommerceFIFUUploader:
             'message': f'Обработано {processed_count} из {total_products} товаров'
         }
 
-    def _upload_image_task(self, sku, clean_sku, images_folder):
+    def _upload_image_task(self, sku, original_sku, images_folder):
         """
         Worker task to upload a single image. Creates its own SFTP connection to be thread-safe.
         """
-        image_path = self.find_product_image(clean_sku, images_folder)
+        image_path = self.find_product_image(original_sku, images_folder)
         
         # Если изображение не найдено и включена заглушка, используем ее URL
         if not image_path and self.use_placeholder and self.placeholder_image_url:
@@ -1177,30 +1267,41 @@ class WooCommerceFIFUUploader:
         if not image_path:
             return sku, None
 
-        thread_uploader = None
-        try:
-            # Create a thread-local SFTP uploader
-            thread_uploader = SFTPImageUploader(**self.ssh_config)
-            thread_uploader.set_log_callback(self.log) # The logger is thread-safe as it uses a queue
+        # Обработка изображения с помощью ImageConverter
+        with tempfile.TemporaryDirectory() as temp_dir:
+            converter = ImageConverter(images_folder, temp_dir)
+            converter.convert_images()  # Обработка всех изображений в папке
+            
+            # Находим обработанное изображение
+            processed_path = os.path.join(temp_dir, os.path.basename(image_path))
+            if not os.path.exists(processed_path):
+                self.log(f"❌ Обработанное изображение для {sku} не найдено в {temp_dir}")
+                return sku, None
 
-            image_url = None
-            if thread_uploader.connect():
-                original_filename = os.path.basename(image_path)
-                clean_filename = thread_uploader.clean_filename(original_filename)
-                
-                image_url = thread_uploader.upload_file(
-                    image_path, 
-                    'products', 
-                    rename_to=clean_filename
-                )
+            thread_uploader = None
+            try:
+                # Create a thread-local SFTP uploader
+                thread_uploader = SFTPImageUploader(**self.ssh_config)
+                thread_uploader.set_log_callback(self.log)
 
-            return sku, image_url
-        except Exception as e:
-            self.log(f"❌ Error during image upload for SKU {sku} in worker thread: {str(e)}")
-            return sku, None
-        finally:
-            if thread_uploader and thread_uploader.connected:
-                thread_uploader.disconnect()
+                image_url = None
+                if thread_uploader.connect():
+                    original_filename = os.path.basename(processed_path)
+                    clean_filename = thread_uploader.clean_filename(original_filename)
+                    
+                    image_url = thread_uploader.upload_file(
+                        processed_path, 
+                        'products', 
+                        rename_to=clean_filename
+                    )
+
+                return sku, image_url
+            except Exception as e:
+                self.log(f"❌ Error during image upload for SKU {sku} in worker thread: {str(e)}")
+                return sku, None
+            finally:
+                if thread_uploader and thread_uploader.connected:
+                    thread_uploader.disconnect()
 
     def _prepare_product_data_task(self, row, images_urls, use_marketing_text=True):
         """Worker task to prepare a single product's data."""
@@ -1236,12 +1337,11 @@ class WooCommerceFIFUUploader:
             sku = str(row.get('SKU', '')).strip()
             if sku and sku not in unique_skus:
                 unique_skus.add(sku)
-                clean_sku = self.clean_sku_for_image(sku)
-                tasks.append((sku, clean_sku))
+                tasks.append((sku, sku))  # Передаем оригинальный SKU
 
         if tasks:
             with ThreadPoolExecutor(max_workers=10) as executor:
-                future_to_sku = {executor.submit(self._upload_image_task, sku, clean_sku, images_folder): sku for sku, clean_sku in tasks}
+                future_to_sku = {executor.submit(self._upload_image_task, sku, original_sku, images_folder): sku for sku, original_sku in tasks}
                 for future in as_completed(future_to_sku):
                     try:
                         sku_result, image_url = future.result()
