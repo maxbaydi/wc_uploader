@@ -593,28 +593,3 @@ class SFTPImageUploader:
                 
         self.log(f"📊 Загрузка директории завершена: {uploaded_files}/{total_files} файлов загружено")
         return results
-
-# Пример использования
-if __name__ == "__main__":
-    # Конфигурация
-    config = {
-        'host': 'bf6baca11842.vps.myjino.ru',
-        'port': 49181,
-        'username': 'root',
-        'password': 'dKX-wGM-RYw-jDH',
-        'remote_base_path': '/var/www/mytua.com/images'
-    }
-    
-    uploader = SFTPImageUploader(**config)
-    
-    # Пример загрузки одного файла
-    if uploader.connect():
-        # Загрузка одного файла
-        url = uploader.upload_file('example.jpg', 'products')
-        print(f"Загруженный файл: {url}")
-        
-        # Загрузка всей директории
-        results = uploader.upload_directory('images/products')
-        print(f"Загружено файлов: {len(results)}")
-        
-        uploader.disconnect()

@@ -5,6 +5,7 @@
 Адаптер для различных форматов CSV файлов
 """
 
+from csv_utils import read_csv_with_fallback
 def parse_characteristics(characteristics_str):
     """
     Converts characteristics string to HTML table
@@ -183,23 +184,15 @@ class CSVAdapter:
         import pandas as pd
         
         try:
-            # Пробуем загрузить с разными кодировками
             encodings = ['utf-8', 'cp1251', 'iso-8859-1', 'windows-1251']
-            df = None
-            
-            for encoding in encodings:
-                try:
-                    df = pd.read_csv(csv_file_path, encoding=encoding)
-                    print(f"✅ CSV loaded with encoding: {encoding}")
-                    break
-                except UnicodeDecodeError:
-                    continue
-                except Exception as e:
-                    print(f"⚠️  Error with encoding {encoding}: {str(e)}")
-                    continue
-            
-            if df is None:
-                print("❌ Failed to load CSV with any encoding")
+            try:
+                df = read_csv_with_fallback(
+                    csv_file_path,
+                    encodings=encodings,
+                    log=print,
+                )
+            except ValueError as e:
+                print(str(e))
                 return None
             
             # Адаптируем DataFrame

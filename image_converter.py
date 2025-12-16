@@ -33,8 +33,6 @@ from pathlib import Path
 from typing import Tuple, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-import time
-import json
 
 import numpy as np
 from PIL import Image, ImageFilter
@@ -52,9 +50,8 @@ BACKGROUND_COLOR = (255, 255, 255)
 SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff'}
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 LOG_FILE = 'image_converter.log'
-DEBUG_LOG_PATH = Path(__file__).parent / ".cursor" / "debug.log"
 
-UPSCALE_HARD_CAP = 1.5
+UPSCALE_HARD_CAP = 3.0
 
 SHARP_THRESHOLD_CV2 = 500.0
 SHARP_THRESHOLD_NO_CV2 = 3000.0
@@ -65,17 +62,6 @@ UNSHARP_MASK_PARAMS = {"radius": 2, "percent": 150, "threshold": 3}
 
 def _select_threshold(cv2_value: float, fallback_value: float) -> float:
     return cv2_value if _HAS_CV2 else fallback_value
-
-
-#region agent log helper
-def _agent_log(payload: dict) -> None:
-    try:
-        DEBUG_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with DEBUG_LOG_PATH.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-#endregion
 
 
 class ImageQualityAnalyzer:
@@ -142,26 +128,25 @@ class ImageQualityAnalyzer:
 
         sharp_threshold = _select_threshold(SHARP_THRESHOLD_CV2, SHARP_THRESHOLD_NO_CV2)
         
-        # RULE 1: For very small images, NEVER upscale. The risk of blur is too high.
-        if res_quality == 'very_small':
-            return 1.0
-
-        # RULE 2: For other images, only allow upscaling if they are reasonably sharp.
-        if sharpness < sharp_threshold:
-            return 1.0
-        
-        # RULE 3: For small and medium images, require significantly higher sharpness
         high_sharpness_threshold = sharp_threshold * 2.0
-        
-        if res_quality == 'small':
-            return 1.0  # Запрет апскейла для small
-        elif res_quality == 'medium':
-            if sharpness >= high_sharpness_threshold:
-                return 1.1
-            else:
-                return 1.0
-        else:
-            return 1.0
+        allowed = 1.0
+
+        if sharpness >= high_sharpness_threshold:
+            if res_quality == 'very_small':
+                allowed = min(UPSCALE_HARD_CAP, 3.0)
+            elif res_quality == 'small':
+                allowed = min(UPSCALE_HARD_CAP, 1.8)
+            elif res_quality == 'medium':
+                allowed = 1.2
+        elif sharpness >= sharp_threshold:
+            if res_quality == 'very_small':
+                allowed = min(UPSCALE_HARD_CAP, 2.0)
+            elif res_quality == 'small':
+                allowed = min(UPSCALE_HARD_CAP, 1.4)
+            elif res_quality == 'medium':
+                allowed = 1.1
+
+        return allowed
 
 
 class ImageConverter:
@@ -251,24 +236,8 @@ class ImageConverter:
         contain_scale = min(self.template_width / orig_width, self.template_height / orig_height)
         quality_limited_upscale = self.quality_analyzer.get_allowed_upscale(image)
 
-        #region agent log
-        _agent_log({
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "H1",
-            "location": "image_converter.py:_calculate_scale_and_position",
-            "message": "scale inputs",
-            "data": {
-                "orig_size": [orig_width, orig_height],
-                "contain_scale": contain_scale,
-                "quality_limited_upscale": quality_limited_upscale
-            },
-            "timestamp": int(time.time() * 1000)
-        })
-        #endregion
-
         if contain_scale > UPSCALE_HARD_CAP:
-            final_scale = 1.0
+            final_scale = min(quality_limited_upscale, UPSCALE_HARD_CAP)
         elif contain_scale > 1.0:
             final_scale = min(contain_scale, quality_limited_upscale, UPSCALE_HARD_CAP)
         else:
@@ -279,22 +248,6 @@ class ImageConverter:
 
         x_position = (self.template_width - new_width) // 2
         y_position = (self.template_height - new_height) // 2
-
-        #region agent log
-        _agent_log({
-            "sessionId": "debug-session",
-            "runId": "run1",
-            "hypothesisId": "H2",
-            "location": "image_converter.py:_calculate_scale_and_position",
-            "message": "scale output",
-            "data": {
-                "final_scale": final_scale,
-                "new_size": [new_width, new_height],
-                "position": [x_position, y_position]
-            },
-            "timestamp": int(time.time() * 1000)
-        })
-        #endregion
 
         return (new_width, new_height), (x_position, y_position)
     
@@ -337,47 +290,12 @@ class ImageConverter:
                 image = self._ensure_rgb(image)
                 resolution_quality, sharpness, (orig_width, orig_height) = self._collect_image_stats(image)
                 (new_width, new_height), (x_pos, y_pos) = self._calculate_scale_and_position(image)
-                final_scale_est = new_height / orig_height if orig_height else 0
-
-                #region agent log
-                _agent_log({
-                    "sessionId": "debug-session",
-                    "runId": "run1",
-                    "hypothesisId": "H3",
-                    "location": "image_converter.py:_process_single_image",
-                    "message": "image stats and targets",
-                    "data": {
-                        "file": image_path.name,
-                        "resolution_quality": resolution_quality,
-                        "sharpness": sharpness,
-                        "orig_size": [orig_width, orig_height],
-                        "target_size": [new_width, new_height],
-                        "final_scale_est": final_scale_est
-                    },
-                    "timestamp": int(time.time() * 1000)
-                })
-                #endregion
 
                 template = self._build_template()
                 resized_image = self._resize_image(image, (new_width, new_height))
 
                 if self._should_apply_unsharp_mask(sharpness):
                     resized_image = self._apply_unsharp_mask(resized_image)
-                    #region agent log
-                    _agent_log({
-                        "sessionId": "debug-session",
-                        "runId": "run1",
-                        "hypothesisId": "H4",
-                        "location": "image_converter.py:_process_single_image",
-                        "message": "applied unsharp mask",
-                        "data": {
-                            "file": image_path.name,
-                            "sharpness": sharpness,
-                            "threshold": self.unsharp_threshold
-                        },
-                        "timestamp": int(time.time() * 1000)
-                    })
-                    #endregion
 
                 template.paste(resized_image, (x_pos, y_pos))
 
@@ -454,19 +372,3 @@ class ImageConverter:
         if failed_count > 0:
             self._log(f"Внимание: {failed_count} изображений не удалось обработать", 'warning')
 
-
-def main():
-    """Главная функция для запуска конвертации."""
-    # Пути к папкам
-    source_directory = "/home/max-bay/Рабочий стол/Projects/temp_parse/img"
-    output_directory = "/home/max-bay/Рабочий стол/Projects/temp_parse/img_result"
-    
-    # Создаем конвертер
-    converter = ImageConverter(source_directory, output_directory)
-    
-    # Запускаем конвертацию
-    converter.convert_images(max_workers=4)
-
-
-if __name__ == "__main__":
-    main()

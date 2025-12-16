@@ -8,10 +8,13 @@ AI Description Generator
 
 import os
 import json
+import importlib
 import pandas as pd
 from typing import List, Dict, Any, Optional, Callable
 import time
 import re
+import httpx
+from csv_utils import read_csv_with_fallback
 from openai import (
     OpenAI,
     APIStatusError,
@@ -27,7 +30,7 @@ class AIDescriptionGenerator:
     
     def __init__(self, api_key: str, api_url: Optional[str] = None, model: str = "gpt-4o-mini",
                  temperature: float = 0.7, max_retries: int = 3, retry_delay: float = 2.0,
-                 timeout: int = 120):
+                 timeout: int = 120, proxy: Optional[str] = None):
         """
         Инициализация генератора описаний
         
@@ -39,6 +42,7 @@ class AIDescriptionGenerator:
             max_retries: Максимальное количество повторных попыток
             retry_delay: Начальная задержка между повторными попытками (сек)
             timeout: Таймаут запроса (сек)
+            proxy: HTTP/SOCKS прокси (например, socks5h://127.0.0.1:1080)
         """
         self.api_key = api_key
         self.api_url = api_url or "https://api.openai.com/v1"
@@ -48,6 +52,7 @@ class AIDescriptionGenerator:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.timeout = timeout
+        self.proxy = proxy
         
         # Callbacks
         self.log_callback: Optional[Callable] = None
@@ -86,6 +91,20 @@ class AIDescriptionGenerator:
         }
         if self.base_url:
             client_kwargs["base_url"] = self.base_url
+
+        http_client = None
+        if self.proxy:
+            if self.proxy.startswith("socks"):
+                if importlib.util.find_spec("socksio") is None:
+                    raise RuntimeError(
+                        "SOCKS прокси требует установленного пакета socksio. "
+                        "Установите: pip install \"httpx[socks]\""
+                    )
+            # используем transport с proxy (совместимо со старыми httpx)
+            transport = httpx.HTTPTransport(proxy=self.proxy)
+            http_client = httpx.Client(transport=transport, timeout=self.timeout)
+            client_kwargs["http_client"] = http_client
+
         return OpenAI(**client_kwargs)
 
     def _get_retry_delay(self, retry: int) -> float:
@@ -93,6 +112,28 @@ class AIDescriptionGenerator:
 
     def _is_retryable_status(self, status_code: Optional[int]) -> bool:
         return status_code in {429, 500, 502, 503, 504}
+
+    def _log_api_status_error(self, error: APIStatusError, attempt: int) -> None:
+        """Логирует детали APIStatusError с телом ответа, если оно есть."""
+        status_code = getattr(error, "status_code", None)
+        details = None
+        response = getattr(error, "response", None)
+
+        if response is not None:
+            try:
+                body = response.json()
+            except Exception:
+                body = response.text if hasattr(response, "text") else None
+
+            if isinstance(body, dict) and "error" in body:
+                details = body["error"]
+            elif body:
+                details = body
+
+        if details:
+            self.log_message(f"⚠️ Ошибка OpenAI: HTTP {status_code} (попытка {attempt}). Детали: {details}")
+        else:
+            self.log_message(f"⚠️ Ошибка OpenAI: HTTP {status_code} (попытка {attempt}). {error}")
 
     def _extract_message_content(self, response: Any) -> str:
         if not response or not getattr(response, "choices", None):
@@ -256,7 +297,7 @@ class AIDescriptionGenerator:
                     break
             except APIStatusError as e:
                 status_code = getattr(e, "status_code", None)
-                self.log_message(f"⚠️ Ошибка OpenAI: HTTP {status_code} (попытка {retry + 1})")
+                self._log_api_status_error(e, retry + 1)
                 if self._is_retryable_status(status_code) and retry < self.max_retries:
                     delay = self._get_retry_delay(retry)
                     self.log_message(f"⏳ Ожидание {delay:.1f} сек. перед повтором...")
@@ -396,13 +437,7 @@ class AIDescriptionGenerator:
             # Читаем CSV файл
             self.log_message(f"📋 Читаю CSV файл: {os.path.basename(csv_file)}")
             
-            try:
-                df = pd.read_csv(csv_file, encoding='utf-8')
-            except UnicodeDecodeError:
-                try:
-                    df = pd.read_csv(csv_file, encoding='cp1251')
-                except UnicodeDecodeError:
-                    df = pd.read_csv(csv_file, encoding='latin-1')
+            df = read_csv_with_fallback(csv_file, log=self.log_message)
                     
             # Проверяем наличие нужной колонки
             if name_column not in df.columns:

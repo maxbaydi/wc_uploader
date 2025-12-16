@@ -20,6 +20,7 @@ import logging
 from PIL import Image, ImageFilter, ImageEnhance
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from csv_utils import read_csv_with_fallback
 
 
 class ImageQualityAnalyzer:
@@ -401,13 +402,7 @@ class ImageDownloader:
             self.log_message(f"📋 Читаю CSV файл: {os.path.basename(csv_file)}")
             
             # Пробуем разные кодировки
-            try:
-                df = pd.read_csv(csv_file, encoding='utf-8')
-            except UnicodeDecodeError:
-                try:
-                    df = pd.read_csv(csv_file, encoding='cp1251')
-                except UnicodeDecodeError:
-                    df = pd.read_csv(csv_file, encoding='latin-1')
+            df = read_csv_with_fallback(csv_file, log=self.log_message)
             
             # Проверяем наличие нужных колонок
             if url_column not in df.columns:

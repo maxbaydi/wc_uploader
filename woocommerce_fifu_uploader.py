@@ -21,6 +21,7 @@ import unicodedata
 from image_converter import ImageConverter
 import tempfile
 import shutil
+from csv_utils import read_csv_with_fallback
 
 # Настройка прокси для всего процесса Python
 if PROXY_CONFIG["disable_proxy"]:
@@ -932,16 +933,13 @@ class WooCommerceFIFUUploader:
                 }
             
             # Read CSV with encoding settings
-            encodings = [CSV_CONFIG.get('encoding', 'utf-8'), CSV_CONFIG.get('fallback_encoding', 'cp1251'), 'windows-1251', 'iso-8859-1']
-            df = None
-            for enc in encodings:
-                try:
-                    df = pd.read_csv(csv_file, encoding=enc)
-                    break
-                except UnicodeDecodeError:
-                    continue
-            if df is None:
-                raise ValueError("Could not read CSV with specified encodings")
+            encodings = [
+                CSV_CONFIG.get('encoding', 'utf-8'),
+                CSV_CONFIG.get('fallback_encoding', 'cp1251'),
+                'windows-1251',
+                'iso-8859-1',
+            ]
+            df = read_csv_with_fallback(csv_file, encodings=encodings, log=self.log)
 
             # Keep only selected columns (if specified)
             if selected_fields is not None:
@@ -1793,31 +1791,3 @@ class WooCommerceFIFUUploader:
             
         except Exception as e:
             self.log(f"❌ Ошибка предварительной загрузки: {str(e)}")
-
-# Пример использования
-if __name__ == "__main__":
-    # Настройки WooCommerce
-    wc_config = {
-        'wc_url': WOOCOMMERCE_CONFIG['url'],
-        'wc_consumer_key': WOOCOMMERCE_CONFIG['consumer_key'],
-        'wc_consumer_secret': WOOCOMMERCE_CONFIG['consumer_secret'],
-        'wp_username': WOOCOMMERCE_CONFIG.get('wp_username'),
-        'wp_app_password': WOOCOMMERCE_CONFIG.get('wp_app_password')
-    }
-    
-    # Настройки SSH
-    ssh_config = {
-        'host': 'bf6baca11842.vps.myjino.ru',
-        'port': 49181,
-        'username': 'root',
-        'password': 'dKX-wGM-RYw-jDH',
-        'remote_base_path': '/images'
-    }
-    
-    # Создаем апплоадер
-    uploader = WooCommerceFIFUUploader(**wc_config, ssh_config=ssh_config)
-    
-    # Загружаем товары
-    results = uploader.upload_products('products.csv', 'images')
-    
-    print(f"Загрузка завершена: {results['uploaded']}/{results['total']} товаров загружено")

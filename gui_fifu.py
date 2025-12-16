@@ -19,6 +19,7 @@ import pandas as pd
 from csv_adapter import CSVAdapter
 from image_downloader import ImageDownloader
 from ai_description_generator import AIDescriptionGenerator
+from csv_utils import read_csv_preview
 
 SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gui_settings.json')
 DEFAULT_DIALOG_DIR = os.path.expanduser("~")
@@ -200,6 +201,7 @@ class UploaderGUI:
         self.ai_model = tk.StringVar(value="gpt-4o-mini")
         self.ai_temperature = tk.DoubleVar(value=0.7)
         self.ai_language = tk.StringVar(value="русский")
+        self.ai_proxy = tk.StringVar(value="")
         self.ai_max_description_length = tk.IntVar(value=300)
         self.ai_batch_size = tk.IntVar(value=5)
         self.ai_delay_between_batches = tk.DoubleVar(value=1.0)
@@ -227,6 +229,9 @@ class UploaderGUI:
         
         # Автоматически загружаем настройки при запуске
         self.load_settings_on_startup()
+
+        # Глобальные бинды для копирования/вставки и контекстного меню
+        self._bind_text_shortcuts()
 
     def _get_initial_dir(self):
         """Возвращает начальный каталог для диалогов выбора файлов/папок."""
@@ -295,13 +300,13 @@ class UploaderGUI:
 
     def _read_csv_preview(self, filename: str, nrows: int = 5):
         """Читает небольшую часть CSV с автоматическим выбором кодировки."""
-        try:
-            return pd.read_csv(filename, nrows=nrows, encoding='utf-8', on_bad_lines='skip')
-        except UnicodeDecodeError:
-            return pd.read_csv(filename, nrows=nrows, encoding='cp1251', on_bad_lines='skip')
-        except Exception as e:
-            self.log_message(f"⚠ Не удалось прочитать CSV для предпросмотра: {e}")
-            return None
+        return read_csv_preview(
+            filename,
+            nrows=nrows,
+            encodings=("utf-8", "cp1251", "iso-8859-1", "windows-1251"),
+            log=self.log_message,
+            on_bad_lines='skip',
+        )
         
     def setup_ui(self):
         # Заголовок
@@ -1262,6 +1267,39 @@ WooCommerce → Настройки → Продвинутые → REST API → �
 
         self.root.after(0, _show)
 
+    def _bind_text_shortcuts(self):
+        """Включает Ctrl+C/X/V/A и контекстное меню для текстовых полей."""
+        targets = ("Entry", "Text", "TEntry", "Spinbox", "TSpinbox")
+        for cls in targets:
+            self.root.bind_class(cls, "<Control-c>", lambda e: e.widget.event_generate("<<Copy>>"))
+            self.root.bind_class(cls, "<Control-C>", lambda e: e.widget.event_generate("<<Copy>>"))
+            self.root.bind_class(cls, "<Control-x>", lambda e: e.widget.event_generate("<<Cut>>"))
+            self.root.bind_class(cls, "<Control-X>", lambda e: e.widget.event_generate("<<Cut>>"))
+            self.root.bind_class(cls, "<Control-v>", lambda e: e.widget.event_generate("<<Paste>>"))
+            self.root.bind_class(cls, "<Control-V>", lambda e: e.widget.event_generate("<<Paste>>"))
+            self.root.bind_class(cls, "<Control-a>", lambda e: (e.widget.event_generate("<<SelectAll>>"), "break"))
+            self.root.bind_class(cls, "<Control-A>", lambda e: (e.widget.event_generate("<<SelectAll>>"), "break"))
+            # Контекстное меню (ПКМ)
+            self.root.bind_class(cls, "<Button-3>", self._show_context_menu)
+
+    def _show_context_menu(self, event):
+        widget = event.widget
+        menu = tk.Menu(widget, tearoff=0)
+
+        def add(label, sequence):
+            menu.add_command(label=label, command=lambda w=widget, seq=sequence: w.event_generate(seq))
+
+        add("Копировать", "<<Copy>>")
+        add("Вырезать", "<<Cut>>")
+        add("Вставить", "<<Paste>>")
+        menu.add_separator()
+        add("Выделить всё", "<<SelectAll>>")
+
+        try:
+            menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            menu.grab_release()
+
     def _log_to_widget(self, message):
         """Вставляет отформатированное сообщение в виджет лога. Должен выполняться в основном потоке."""
         # Проверяем, находится ли скроллбар в самом низу перед добавлением текста
@@ -1800,6 +1838,14 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         
         tk.Label(api_url_frame, text="API URL:", width=20, anchor='w').pack(side=tk.LEFT)
         tk.Entry(api_url_frame, textvariable=self.ai_api_url).pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Прокси
+        proxy_frame = tk.Frame(api_frame)
+        proxy_frame.pack(fill=tk.X, pady=(0, 5))
+
+        tk.Label(proxy_frame, text="Прокси (HTTP/SOCKS):", width=20, anchor='w').pack(side=tk.LEFT)
+        tk.Entry(proxy_frame, textvariable=self.ai_proxy).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        tk.Label(proxy_frame, text="например socks5h://127.0.0.1:1080", fg="#666666", font=("Arial", 8)).pack(side=tk.LEFT, padx=(8, 0))
         
         # Модель
         model_frame = tk.Frame(api_frame)
@@ -2095,6 +2141,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 'ai_model': self.ai_model,
                 'ai_temperature': self.ai_temperature,
                 'ai_language': self.ai_language,
+                'ai_proxy': self.ai_proxy,
                 'ai_max_description_length': self.ai_max_description_length,
                 'ai_batch_size': self.ai_batch_size,
                 'ai_delay_between_batches': self.ai_delay_between_batches,
@@ -2120,6 +2167,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 'ai_model': self.ai_model.get(),
                 'ai_temperature': self.ai_temperature.get(),
                 'ai_language': self.ai_language.get(),
+                'ai_proxy': self.ai_proxy.get(),
                 'ai_max_description_length': self.ai_max_description_length.get(),
                 'ai_batch_size': self.ai_batch_size.get(),
                 'ai_delay_between_batches': self.ai_delay_between_batches.get(),
@@ -2198,7 +2246,8 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                 temperature=self.ai_temperature.get(),
                 max_retries=self.ai_max_retries.get(),
                 retry_delay=self.ai_retry_delay.get(),
-                timeout=self.ai_timeout.get()
+                timeout=self.ai_timeout.get(),
+                proxy=self.ai_proxy.get().strip() or None
             )
             
             self.ai_generator.set_log_callback(self.log_message)
@@ -2289,7 +2338,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
 
             if any(k in settings for k in [
                 'ai_api_key', 'ai_api_url', 'ai_model', 'ai_temperature', 'ai_language',
-                'ai_max_description_length', 'ai_batch_size', 'ai_delay_between_batches',
+                'ai_proxy', 'ai_max_description_length', 'ai_batch_size', 'ai_delay_between_batches',
                 'ai_translate_names', 'ai_max_retries', 'ai_retry_delay', 'ai_timeout'
             ]):
                 self._apply_settings(settings, {
@@ -2298,6 +2347,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
                     'ai_model': self.ai_model,
                     'ai_temperature': self.ai_temperature,
                     'ai_language': self.ai_language,
+                    'ai_proxy': self.ai_proxy,
                     'ai_max_description_length': self.ai_max_description_length,
                     'ai_batch_size': self.ai_batch_size,
                     'ai_delay_between_batches': self.ai_delay_between_batches,
