@@ -1,6 +1,7 @@
 # Основные зависимости приложения
 woocommerce==3.0.0
 requests==2.31.0
+openai==1.55.0
 pandas==2.3.0
 numpy==2.3.1
 pillow==10.0.1

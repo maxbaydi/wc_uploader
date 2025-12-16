@@ -3,38 +3,46 @@
 
 """
 AI Description Generator
-Модуль для генерации описаний товаров с помощью OpenAI API (через vsegpt)
+Модуль для генерации описаний товаров с помощью OpenAI API
 """
 
 import os
 import json
 import pandas as pd
-import requests
 from typing import List, Dict, Any, Optional, Callable
-from pathlib import Path
 import time
 import re
+from openai import (
+    OpenAI,
+    APIStatusError,
+    APITimeoutError,
+    RateLimitError,
+    APIConnectionError,
+    APIError,
+)
 
 
 class AIDescriptionGenerator:
     """Класс для генерации описаний товаров с помощью AI"""
     
-    def __init__(self, api_key: str, api_url: str, model: str = "gpt-3.5-turbo", temperature: float = 0.7,
-                 max_retries: int = 3, retry_delay: float = 2.0, timeout: int = 120):
+    def __init__(self, api_key: str, api_url: Optional[str] = None, model: str = "gpt-4o-mini",
+                 temperature: float = 0.7, max_retries: int = 3, retry_delay: float = 2.0,
+                 timeout: int = 120):
         """
         Инициализация генератора описаний
         
         Args:
-            api_key: API ключ для доступа к vsegpt
-            api_url: URL API endpoint vsegpt
-            model: Модель для использования
+            api_key: API ключ OpenAI
+            api_url: Базовый URL совместимого OpenAI API (по умолчанию api.openai.com/v1)
+            model: Модель для использования (по умолчанию gpt-4o-mini)
             temperature: Температура генерации (0.0-1.0)
             max_retries: Максимальное количество повторных попыток
             retry_delay: Начальная задержка между повторными попытками (сек)
             timeout: Таймаут запроса (сек)
         """
         self.api_key = api_key
-        self.api_url = api_url
+        self.api_url = api_url or "https://api.openai.com/v1"
+        self.base_url = self._normalize_api_url(self.api_url)
         self.model = model
         self.temperature = temperature
         self.max_retries = max_retries
@@ -59,6 +67,48 @@ class AIDescriptionGenerator:
             'retries': 0,
             'failed_after_retries': 0
         }
+
+        # Клиент OpenAI
+        self.client = self._create_client()
+
+    def _normalize_api_url(self, api_url: Optional[str]) -> Optional[str]:
+        if not api_url:
+            return None
+        cleaned = api_url.strip().rstrip("/")
+        if cleaned.endswith("/chat/completions"):
+            cleaned = cleaned.rsplit("/chat/completions", 1)[0].rstrip("/")
+        return cleaned or None
+
+    def _create_client(self) -> OpenAI:
+        client_kwargs: Dict[str, Any] = {
+            "api_key": self.api_key,
+            "timeout": self.timeout
+        }
+        if self.base_url:
+            client_kwargs["base_url"] = self.base_url
+        return OpenAI(**client_kwargs)
+
+    def _get_retry_delay(self, retry: int) -> float:
+        return self.retry_delay * (2 ** retry)
+
+    def _is_retryable_status(self, status_code: Optional[int]) -> bool:
+        return status_code in {429, 500, 502, 503, 504}
+
+    def _extract_message_content(self, response: Any) -> str:
+        if not response or not getattr(response, "choices", None):
+            return ""
+        message_content = response.choices[0].message.content
+        if isinstance(message_content, str):
+            return message_content.strip()
+        if isinstance(message_content, list):
+            parts = []
+            for part in message_content:
+                if isinstance(part, dict) and part.get("type") == "text":
+                    parts.append(part.get("text", ""))
+                elif isinstance(part, str):
+                    parts.append(part)
+            return "".join(parts).strip()
+        return ""
         
     def set_log_callback(self, callback: Callable[[str], None]) -> None:
         """Устанавливает callback для логирования"""
@@ -140,11 +190,6 @@ class AIDescriptionGenerator:
         Returns:
             Ответ от API в виде словаря или None при ошибке
         """
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
         payload = {
             "model": self.model,
             "messages": [
@@ -159,109 +204,78 @@ class AIDescriptionGenerator:
         for retry in range(self.max_retries + 1):
             try:
                 if retry == 0:
-                    self.log_message(f"🤖 Отправка запроса к AI API (модель: {self.model}, температура: {self.temperature})")
+                    self.log_message(f"🤖 Отправка запроса к OpenAI (модель: {self.model}, температура: {self.temperature})")
                 else:
                     self.stats['retries'] += 1
                     self.log_message(f"🔄 Повторная попытка #{retry} для пакета {attempt_number}")
                 
-                response = requests.post(
-                    self.api_url,
-                    headers=headers,
-                    json=payload,
-                    timeout=self.timeout
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    
-                    if 'choices' in result and len(result['choices']) > 0:
-                        content = result['choices'][0]['message']['content']
-                        
-                        # Улучшенный парсинг JSON с обработкой неполных ответов
-                        try:
-                            descriptions_data = json.loads(content)
-                            if retry > 0:
-                                self.log_message(f"✅ Успешно восстановлено после {retry} попыток")
-                            return descriptions_data
-                        except json.JSONDecodeError as e:
-                            self.log_message(f"❌ Ошибка парсинга JSON (попытка {retry + 1}): {e}")
-                            if "Unterminated string" in str(e) or "Expecting" in str(e):
-                                # Пытаемся исправить неполный JSON
-                                try:
-                                    # Попробуем найти закрывающую скобку и восстановить JSON
-                                    if content.count('{') > content.count('}'):
-                                        fixed_content = content + '"}]}'
-                                        descriptions_data = json.loads(fixed_content)
-                                        self.log_message(f"✅ JSON восстановлен автоматически")
-                                        return descriptions_data
-                                except:
-                                    pass
-                            
-                            # Показываем содержимое только при последней попытке
-                            if retry == self.max_retries:
-                                self.log_message(f"Содержимое ответа: {content[:500]}...")
-                            
-                            # Если это не последняя попытка, продолжаем retry
-                            if retry < self.max_retries:
-                                continue
-                            else:
-                                return None
-                            
-                    else:
-                        self.log_message(f"❌ Неожиданный формат ответа от AI API (попытка {retry + 1})")
-                        if retry < self.max_retries:
-                            continue
-                        else:
-                            return None
-                        
-                elif response.status_code in [429, 502, 503, 504]:  # Повторяемые ошибки
-                    self.log_message(f"⚠️ Временная ошибка API: HTTP {response.status_code} (попытка {retry + 1})")
+                response = self.client.chat.completions.create(**payload, timeout=self.timeout)
+                content = self._extract_message_content(response)
+
+                if not content:
+                    self.log_message(f"❌ Пустой ответ от OpenAI (попытка {retry + 1})")
                     if retry < self.max_retries:
-                        delay = self.retry_delay * (2 ** retry)  # Экспоненциальная задержка
-                        self.log_message(f"⏳ Ожидание {delay:.1f} сек. перед повтором...")
-                        time.sleep(delay)
                         continue
                     else:
-                        self.log_message(f"❌ Исчерпаны все попытки. Ошибка API: HTTP {response.status_code}")
-                        return None
-                else:
-                    # Неповторяемые ошибки - сразу возвращаем None
-                    self.log_message(f"❌ Критическая ошибка API: HTTP {response.status_code}")
-                    self.log_message(f"Ответ: {response.text}")
-                    return None
+                        break
+
+                # Улучшенный парсинг JSON с обработкой неполных ответов
+                try:
+                    descriptions_data = json.loads(content)
+                    if retry > 0:
+                        self.log_message(f"✅ Успешно восстановлено после {retry} попыток")
+                    return descriptions_data
+                except json.JSONDecodeError as e:
+                    self.log_message(f"❌ Ошибка парсинга JSON (попытка {retry + 1}): {e}")
+                    if "Unterminated string" in str(e) or "Expecting" in str(e):
+                        try:
+                            if content.count('{') > content.count('}'):
+                                fixed_content = content + '"}]}'
+                                descriptions_data = json.loads(fixed_content)
+                                self.log_message(f"✅ JSON восстановлен автоматически")
+                                return descriptions_data
+                        except Exception:
+                            pass
                     
-            except requests.exceptions.Timeout:
-                self.log_message(f"⏰ Таймаут запроса к AI API (попытка {retry + 1}, timeout: {self.timeout}с)")
+                    if retry == self.max_retries:
+                        self.log_message(f"Содержимое ответа: {content[:500]}...")
+                    
+                    if retry < self.max_retries:
+                        continue
+                    else:
+                        break
+                            
+            except (APITimeoutError, RateLimitError, APIConnectionError) as e:
+                self.log_message(f"⚠️ Временная ошибка OpenAI (попытка {retry + 1}): {e}")
                 if retry < self.max_retries:
-                    delay = self.retry_delay * (2 ** retry)
+                    delay = self._get_retry_delay(retry)
                     self.log_message(f"⏳ Ожидание {delay:.1f} сек. перед повтором...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.log_message("❌ Исчерпаны все попытки по таймауту")
-                    return None
-                    
-            except requests.exceptions.RequestException as e:
-                self.log_message(f"🌐 Ошибка сети (попытка {retry + 1}): {e}")
-                if retry < self.max_retries:
-                    delay = self.retry_delay * (2 ** retry)
+                    break
+            except APIStatusError as e:
+                status_code = getattr(e, "status_code", None)
+                self.log_message(f"⚠️ Ошибка OpenAI: HTTP {status_code} (попытка {retry + 1})")
+                if self._is_retryable_status(status_code) and retry < self.max_retries:
+                    delay = self._get_retry_delay(retry)
                     self.log_message(f"⏳ Ожидание {delay:.1f} сек. перед повтором...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.log_message("❌ Исчерпаны все попытки по сетевой ошибке")
                     return None
-                    
+            except APIError as e:
+                self.log_message(f"❌ Критическая ошибка OpenAI: {e}")
+                return None
             except Exception as e:
                 self.log_message(f"💥 Неожиданная ошибка (попытка {retry + 1}): {e}")
                 if retry < self.max_retries:
-                    delay = self.retry_delay * (2 ** retry)
+                    delay = self._get_retry_delay(retry)
                     self.log_message(f"⏳ Ожидание {delay:.1f} сек. перед повтором...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.log_message("❌ Исчерпаны все попытки по неожиданной ошибке")
-                    return None
+                    break
         
         # Если дошли сюда, значит все попытки исчерпаны
         self.stats['failed_after_retries'] += 1

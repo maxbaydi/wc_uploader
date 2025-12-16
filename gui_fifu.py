@@ -71,8 +71,6 @@ class ScrollableFrame(ttk.Frame):
         canvas_width = event.width - self.scrollbar.winfo_reqwidth()
         self.canvas.configure(width=canvas_width)
         self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
-        # Подгоняем высоту содержимого под доступную область, чтобы оно могло растягиваться
-        self.canvas.itemconfig(self.canvas_frame, height=event.height)
         
     def _bind_mousewheel(self, _event=None):
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
@@ -99,18 +97,16 @@ class ScrollableFrame(ttk.Frame):
 
         target = self.winfo_containing(event.x_root, event.y_root)
 
+        # Обрабатываем только если курсор внутри текущего ScrollableFrame
+        if not (target and self._is_descendant(target)):
+            return
+
         # Если колесо над вложенным текстовым виджетом — прокручиваем его, а не весь canvas
-        if target and self._is_descendant(target):
-            if hasattr(target, "yview_scroll"):
-                target.yview_scroll(delta, "units")
-                return "break"
+        if hasattr(target, "yview_scroll"):
+            target.yview_scroll(delta, "units")
+            return "break"
 
-            # Если событие на дочернем виджете, но без собственной прокрутки — прокручиваем canvas
-            if self._has_vertical_overflow():
-                self.canvas.yview_scroll(delta, "units")
-                return "break"
-
-        # Если колесо крутится вне дочерних или в пустой зоне — скроллим только при переполнении
+        # Иначе — прокручиваем содержимое кадра, если есть переполнение
         if self._has_vertical_overflow():
             self.canvas.yview_scroll(delta, "units")
             return "break"
@@ -200,8 +196,8 @@ class UploaderGUI:
         # Переменные для AI генерации описаний
         self.ai_csv_file_path = tk.StringVar()
         self.ai_api_key = tk.StringVar()
-        self.ai_api_url = tk.StringVar(value="https://api.vsegpt.ru/v1/chat/completions")
-        self.ai_model = tk.StringVar(value="gpt-3.5-turbo")
+        self.ai_api_url = tk.StringVar(value="https://api.openai.com/v1")
+        self.ai_model = tk.StringVar(value="gpt-4o-mini")
         self.ai_temperature = tk.DoubleVar(value=0.7)
         self.ai_language = tk.StringVar(value="русский")
         self.ai_max_description_length = tk.IntVar(value=300)
@@ -924,10 +920,9 @@ WooCommerce → Настройки → Продвинутые → REST API → �
         
     def setup_progress_tab(self, notebook):
         """Настройка вкладки с прогрессом"""
-        # Создаем прокручиваемый фрейм
-        scrollable_tab = ScrollableFrame(notebook)
-        notebook.add(scrollable_tab, text="Процесс")
-        progress_frame = scrollable_tab.scrollable_frame
+        # Эта вкладка не требует скролла — используем обычный фрейм, чтобы лог тянулся с окном
+        progress_frame = tk.Frame(notebook)
+        notebook.add(progress_frame, text="Процесс")
         
         # Прогресс бар
         progress_container = tk.Frame(progress_frame)
@@ -2022,9 +2017,9 @@ WooCommerce → Настройки → Продвинутые → REST API → �
 • Выберите язык описаний и максимальную длину
 
 🔧 НАСТРОЙКИ API:
-• API ключ - ваш ключ доступа к vsegpt
-• URL - endpoint API (по умолчанию vsegpt)
-• Модель - используемая AI модель (gpt-3.5-turbo рекомендуется)
+• API ключ - ваш OpenAI API ключ
+• URL - базовый endpoint (по умолчанию https://api.openai.com/v1)
+• Модель - используемая AI модель (например gpt-4o-mini или gpt-3.5-turbo)
 • Температура - креативность ответов (0.0-1.0)
 
 ⚡ ПАКЕТНАЯ ОБРАБОТКА:
@@ -2161,10 +2156,7 @@ WooCommerce → Настройки → Продвинутые → REST API → �
             messagebox.showerror("Ошибка", "Не указан API ключ.")
             return
         
-        api_url = self.ai_api_url.get().strip()
-        if not api_url:
-            messagebox.showerror("Ошибка", "Не указан API URL.")
-            return
+        api_url = self.ai_api_url.get().strip() or None
         
         name_column = self.ai_name_column.get().strip()
         if not name_column:
